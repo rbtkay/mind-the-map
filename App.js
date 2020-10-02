@@ -13,8 +13,12 @@ import MainScreen from "./_screens/MainScreen";
 import ScoreScreen from "./_screens/ScoreScreen";
 import HomeScreen from "./_screens/HomeScreen";
 import LoginScreen from "./_screens/LoginScreen";
+import { Provider } from "react-redux";
+import { createStore } from "redux";
+import rootReducer from "./_reducers";
 
 const Stack = createStackNavigator();
+const store = createStore(rootReducer);
 
 export default function App() {
     const [fontLoading, setFontLoading] = useState(true);
@@ -37,43 +41,45 @@ export default function App() {
     }
 
     return (
-        <Root>
-            <NavigationContainer>
-                <Stack.Navigator>
-                    <Stack.Screen
-                        name="LoginScreen"
-                        options={{
-                            headerShown: false,
-                        }}
-                    >
-                        {(props) => <LoginScreen {...props} />}
-                    </Stack.Screen>
-                    <Stack.Screen
-                        name="ScoreScreen"
-                        options={{
-                            headerShown: false,
-                        }}
-                    >
-                        {(props) => <ScoreScreen {...props} />}
-                    </Stack.Screen>
-                    <Stack.Screen
-                        name="HomeScreen"
-                        options={{
-                            headerShown: false,
-                        }}
-                    >
-                        {(props) => <HomeScreen {...props} />}
-                    </Stack.Screen>
-                    <Stack.Screen
-                        name="MainScreen"
-                        options={{
-                            headerShown: false,
-                        }}
-                    >
-                        {(props) => <MainScreen {...props} />}
-                    </Stack.Screen>
-                </Stack.Navigator>
-            </NavigationContainer>
-        </Root>
+        <Provider store={store}>
+            <Root>
+                <NavigationContainer>
+                    <Stack.Navigator>
+                        <Stack.Screen
+                            name="LoginScreen"
+                            options={{
+                                headerShown: false,
+                            }}
+                        >
+                            {(props) => <LoginScreen {...props} />}
+                        </Stack.Screen>
+                        <Stack.Screen
+                            name="ScoreScreen"
+                            options={{
+                                headerShown: false,
+                            }}
+                        >
+                            {(props) => <ScoreScreen {...props} />}
+                        </Stack.Screen>
+                        <Stack.Screen
+                            name="HomeScreen"
+                            options={{
+                                headerShown: false,
+                            }}
+                        >
+                            {(props) => <HomeScreen {...props} />}
+                        </Stack.Screen>
+                        <Stack.Screen
+                            name="MainScreen"
+                            options={{
+                                headerShown: false,
+                            }}
+                        >
+                            {(props) => <MainScreen {...props} />}
+                        </Stack.Screen>
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </Root>
+        </Provider>
     );
 }

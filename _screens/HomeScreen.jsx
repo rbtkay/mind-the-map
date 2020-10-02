@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Dimensions, StyleSheet } from "react-native";
 import {
     Content,
@@ -17,6 +17,7 @@ import {
 } from "native-base";
 import Theme from "../_components/Theme";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { AsyncStorage } from "react-native";
 
 const themes = [
     {
@@ -34,6 +35,18 @@ const themes = [
 ];
 
 const HomeScreen = () => {
+    useEffect(() => {
+        (async function () {
+            try {
+                const value = await AsyncStorage.getItem("username");
+                if (value !== null) {
+                    console.log(value);
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+    });
     return (
         <Container>
             <Header>
@@ -49,9 +62,17 @@ const HomeScreen = () => {
                 </View>
                 {themes.map((th, index) => {
                     if (index % 2 != 0 && index != 0) {
-                        return <Row themes={themes} index={index} key={index}/>;
+                        return (
+                            <Row themes={themes} index={index} key={index} />
+                        );
                     } else if (index == themes.length - 1) {
-                        return <Theme name={th.name} image={th.imageUrl} key={index}/>;
+                        return (
+                            <Theme
+                                name={th.name}
+                                image={th.imageUrl}
+                                key={index}
+                            />
+                        );
                     }
                 })}
             </Content>

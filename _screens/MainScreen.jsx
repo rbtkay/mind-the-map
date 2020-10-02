@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Dimensions } from "react-native";
+import { View, Text, Dimensions, LogBox } from "react-native";
 import {
     Content,
     Container,
@@ -17,6 +17,8 @@ import MapView, { Overlay } from "react-native-maps";
 import Timer from "../_components/Timer";
 
 const MainScreen = ({ navigation }) => {
+    LogBox.ignoreLogs(["Failed prop type"]);
+
     const [marker, setMarker] = useState(null); 
     const [numberOfAttempts, setNumberOfAttemps] = useState(0);
 
@@ -61,7 +63,7 @@ const MainScreen = ({ navigation }) => {
                     >
                         {marker && <MapView.Marker coordinate={marker} />}
                     </MapView>
-                    <Overlay style={styles.overlay} >
+                    <Overlay style={styles.overlay} image={null}>
                         <Timer  />
                     </Overlay>
                 </View>

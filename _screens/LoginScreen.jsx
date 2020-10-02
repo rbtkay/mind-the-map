@@ -21,11 +21,20 @@ import {
 import Theme from "../_components/Theme";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
+import { AsyncStorage } from 'react-native';
 
 const LoginScreen = () => {
     const navigation = useNavigation();
 
-    const onLoginPress = () => {
+    const onLoginPress = async() => {
+        try {
+            await AsyncStorage.setItem(
+              'username',
+              'Rbtkay'
+            );
+          } catch (error) {
+            console.log(error);
+          } 
         navigation.navigate("HomeScreen");
     };
 
