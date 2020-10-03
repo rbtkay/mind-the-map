@@ -14,6 +14,8 @@ import {
 
 import MapView, { Overlay } from "react-native-maps";
 import { connect } from "react-redux";
+import { NavigationContext } from "@react-navigation/native";
+import { getDistanceFromLatLonInKm } from "../_helpers";
 
 const MainScreen = ({ navigation, monuments }) => {
     LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
@@ -22,21 +24,48 @@ const MainScreen = ({ navigation, monuments }) => {
     const [correctMarker, setCorrectMarker] = useState(null);
     const [correctMarkerArray, setCorrectMarkerArray] = useState([]);
     const [numberOfAttempts, setNumberOfAttemps] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(true);
 
     const placeMarker = (e) => {
-        console.log("step ", numberOfAttempts);
+        if (!isPlaying) return;
+
+        setMarker(e.nativeEvent.coordinate);
+        setCorrectMarker(correctMarkerArray[numberOfAttempts]);
+        setIsPlaying(false);
+    };
+
+    const nextPoi = () => {
         if (numberOfAttempts >= correctMarkerArray.length - 1) {
             navigation.navigate("ScoreScreen");
         } else {
             setNumberOfAttemps(numberOfAttempts + 1);
-            setMarker(e.nativeEvent.coordinate);
-            setCorrectMarker(correctMarkerArray[numberOfAttempts]);
+            setMarker(null);
+            setCorrectMarker(null);
+            setIsPlaying(true);
         }
     };
 
-    // useEffect(() => {
-    //     console.log("****", correctMarkerArray);
-    // }, [numberOfAttempts]);
+    useEffect(() => {
+        if (marker) {
+            console.log("marker", marker);
+            console.log("correctMarker", correctMarker);
+            let distanceBetweenPinsInKm = getDistanceFromLatLonInKm(
+                marker.latitude,
+                marker.longitude,
+                correctMarker.latitude,
+                correctMarker.longitude
+            );
+
+            distanceBetweenPinsInKm = Number(
+                distanceBetweenPinsInKm
+            ).toFixed(3);
+
+            console.log(
+                "distanceBetweenPinsInKm - ",
+                distanceBetweenPinsInKm
+            );
+        }
+    }, [marker]);
 
     useEffect(() => {
         // console.log("monuments:", monuments);
@@ -61,7 +90,6 @@ const MainScreen = ({ navigation, monuments }) => {
             //     },
             // ]);
         });
-        console.log("0000000 - ", correctCoordinates);
         setCorrectMarkerArray(correctCoordinates);
     }, []);
 
@@ -104,7 +132,8 @@ const MainScreen = ({ navigation, monuments }) => {
                                 pinColor={"green"}
                             />
                         )}
-                        {/* {correctMarkerArray.map((mark, i) => {
+                        {/* TODO: move back to position on every question
+                         {correctMarkerArray.map((mark, i) => {
                             return (
                                 <MapView.Marker
                                     key={i}
@@ -119,6 +148,11 @@ const MainScreen = ({ navigation, monuments }) => {
                     </MapView>
                     <Overlay style={styles.overlay} image={null}>
                         {/* <Timer /> */}
+                        {!isPlaying && (
+                            <Button onPress={() => nextPoi()}>
+                                <Text>Next</Text>
+                            </Button>
+                        )}
                     </Overlay>
                 </View>
             </Content>
