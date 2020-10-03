@@ -18,6 +18,8 @@ import {
 import Theme from "../_components/Theme";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { AsyncStorage } from "react-native";
+import { getMonuments } from "../_api/pois";
+import { setMonuments } from "../_actions/game";
 
 const themes = [
     {
@@ -33,6 +35,18 @@ const themes = [
         imageUrl: require("../assets/London.jpeg"),
     },
 ];
+
+const Row = ({ themes, index }) => {
+    return (
+        <View style={{ flex: 2, flexDirection: "row" }}>
+            <Theme
+                name={themes[index - 1].name}
+                image={themes[index - 1].imageUrl}
+            />
+            <Theme name={themes[index].name} image={themes[index].imageUrl} />
+        </View>
+    );
+};
 
 const HomeScreen = () => {
     useEffect(() => {
@@ -80,17 +94,6 @@ const HomeScreen = () => {
     );
 };
 
-const Row = ({ themes, index }) => {
-    return (
-        <View style={{ flex: 2, flexDirection: "row" }}>
-            <Theme
-                name={themes[index - 1].name}
-                image={themes[index - 1].imageUrl}
-            />
-            <Theme name={themes[index].name} image={themes[index].imageUrl} />
-        </View>
-    );
-};
 
 const styles = StyleSheet.create({
     container: {

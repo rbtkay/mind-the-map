@@ -46,12 +46,26 @@ import {
     Right,
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
+import { connect } from "react-redux";
+import { getMonuments } from "../_api/pois";
+import { setMonuments, setCity } from "../_actions/game";
 
-const Theme = ({ image, name }) => {
+const NUMBER_OF_QUESTION_PER_ROUND = 5;
+
+const Theme = ({ image, name, setMonuments, setCity }) => {
     const navigation = useNavigation();
 
     const onPress = () => {
-        navigation.navigate("MainScreen");
+        const chosen_ids = [];
+        for (let i = 0; i < NUMBER_OF_QUESTION_PER_ROUND; i++) {
+            const current_number = `${name}_${Math.floor(Math.random() * 42)}`;
+            chosen_ids.push(current_number);
+        }
+        getMonuments(chosen_ids, "Paris").then((monuments) => {
+            setMonuments(monuments);
+            setCity("Paris");
+            navigation.navigate("MainScreen");
+        });
     };
 
     return (
@@ -77,10 +91,18 @@ const Theme = ({ image, name }) => {
     );
 };
 
+const mapStateToProps = (state) => ({
+    monuments: state.monuments,
+});
+const mapDispatchToProps = (dispatch) => ({
+    setMonuments: (monuments) => dispatch(setMonuments(monuments)),
+    setCity: (city) => dispatch(setCity(city)),
+});
+
 const styles = StyleSheet.create({
     th_container: {
         flex: 1,
     },
 });
 
-export default Theme;
+export default connect(mapStateToProps, mapDispatchToProps)(Theme);

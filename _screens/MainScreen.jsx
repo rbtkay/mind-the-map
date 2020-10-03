@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Dimensions, LogBox } from "react-native";
+import { View, Text, Dimensions, LogBox, Settings } from "react-native";
 import {
     Content,
     Container,
@@ -13,64 +13,122 @@ import {
 } from "native-base";
 
 import MapView, { Overlay } from "react-native-maps";
+import { connect } from "react-redux";
 
-import Timer from "../_components/Timer";
+const MainScreen = ({ navigation, monuments }) => {
+    LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
 
-const MainScreen = ({ navigation }) => {
-    LogBox.ignoreLogs(["Failed prop type"]);
-
-    const [marker, setMarker] = useState(null); 
+    const [marker, setMarker] = useState(null);
+    const [correctMarker, setCorrectMarker] = useState(null);
+    const [correctMarkerArray, setCorrectMarkerArray] = useState([]);
     const [numberOfAttempts, setNumberOfAttemps] = useState(0);
 
     const placeMarker = (e) => {
-        setNumberOfAttemps(numberOfAttempts + 1);
-        setMarker(e.nativeEvent.coordinate);
+        console.log("step ", numberOfAttempts);
+        if (numberOfAttempts >= correctMarkerArray.length - 1) {
+            navigation.navigate("ScoreScreen");
+        } else {
+            setNumberOfAttemps(numberOfAttempts + 1);
+            setMarker(e.nativeEvent.coordinate);
+            setCorrectMarker(correctMarkerArray[numberOfAttempts]);
+        }
     };
 
+    // useEffect(() => {
+    //     console.log("****", correctMarkerArray);
+    // }, [numberOfAttempts]);
+
     useEffect(() => {
-        if (numberOfAttempts >= 5) {
-            navigation.navigate("ScoreScreen");
-        }
-    }, [numberOfAttempts]);
+        // console.log("monuments:", monuments);
+        const correctCoordinates = [];
+        monuments.forEach((mon) => {
+            // console.log("name", mon.name);
+            // // console.log(mon);
+            // console.log("latitude", mon.latitude_decimal);
+            // if(mon.name == "Lake Annecy"){
+            //     console.log(mon);
+            // }
+            correctCoordinates.push({
+                name: mon.name,
+                latitude: mon.latitude_decimal,
+                longitude: mon.longitude_decimal,
+            });
+            // setCorrectMarker([
+            //     ...correctMarker,
+            //     {
+            //         latitude: mon.latitude,
+            //         longitude: mon.longitude,
+            //     },
+            // ]);
+        });
+        console.log("0000000 - ", correctCoordinates);
+        setCorrectMarkerArray(correctCoordinates);
+    }, []);
 
     return (
         <Container>
             <Header>
-                <Left>
-                    <Button transparent>
-                        <Icon name="menu" />
-                    </Button>
-                </Left>
+                <Left></Left>
                 <Body>
-                    <Title>Header</Title>
+                    {correctMarkerArray.length > 0 && (
+                        <Title>
+                            {correctMarkerArray[numberOfAttempts].name}
+                        </Title>
+                    )}
                 </Body>
-                <Right>
-                    <Text>X</Text>
-                </Right>
+                {/* <Right>
+                    <Button onPress={() => setCorrectMarker(null)}>
+                        <Text>Next</Text>
+                    </Button>
+                </Right> */}
             </Header>
             <Content>
                 <View style={styles.container}>
                     <MapView
                         style={styles.mapStyle}
-                        
                         initialRegion={{
-                            latitude: 48.8582222,
-                            longitude: 2.2944999999999998,
-                            latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421,
+                            latitude: 48.8555,
+                            longitude: 2.3522,
+                            latitudeDelta: 0.1,
+                            longitudeDelta: 0.13,
                         }}
                         onPress={placeMarker}
                     >
                         {marker && <MapView.Marker coordinate={marker} />}
+                        {correctMarker && (
+                            <MapView.Marker
+                                coordinate={{
+                                    latitude: correctMarker.latitude,
+                                    longitude: correctMarker.longitude,
+                                }}
+                                pinColor={"green"}
+                            />
+                        )}
+                        {/* {correctMarkerArray.map((mark, i) => {
+                            return (
+                                <MapView.Marker
+                                    key={i}
+                                    coordinate={{
+                                        latitude: mark.latitude,
+                                        longitude: mark.longitude,
+                                    }}
+                                    pinColor={"green"}
+                                />
+                            );
+                        })} */}
                     </MapView>
                     <Overlay style={styles.overlay} image={null}>
-                        <Timer  />
+                        {/* <Timer /> */}
                     </Overlay>
                 </View>
             </Content>
         </Container>
     );
 };
+
+const mapStateToProps = (state) => ({
+    monuments: state.game.monuments,
+});
 
 const styles = {
     container: {
@@ -83,13 +141,14 @@ const styles = {
         width: Dimensions.get("window").width,
         height: Dimensions.get("window").height,
     },
-    overlay:{
-        position: 'absolute',
+    overlay: {
+        position: "absolute",
         bottom: 100,
-        right: 40
-    }
+        right: 40,
+    },
 };
 
+export default connect(mapStateToProps, null)(MainScreen);
 
 // customMapStyle={[
 //     {
@@ -127,4 +186,3 @@ const styles = {
 //         ],
 //     },
 // ]}
-export default MainScreen;

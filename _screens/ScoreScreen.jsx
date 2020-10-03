@@ -31,10 +31,11 @@ const ScoreScreen = () => {
                     <H1>CONGRATS</H1>
 
                     <View style={styles.scoreContent}>
-                        <H2>Your Score: xxx / xxx</H2>
+                        {/* TODO: Calculate Score */}
+                        <H2>Your Score: xxx / xxx</H2> 
                     </View>
                     <View>
-                        {/* liste de monument decouvert */}
+                        {/* TODO: get info on the monument discovered */}
                     </View>
                 </View>
             </Content>
