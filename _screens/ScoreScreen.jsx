@@ -17,8 +17,10 @@ import {
     Footer,
 } from "native-base";
 import Theme from "../_components/Theme";
+import { connect } from "react-redux";
 
-const ScoreScreen = () => {
+const ScoreScreen = ({score}) => {
+    console.log(score);
     return (
         <Container>
             <Header>
@@ -31,8 +33,7 @@ const ScoreScreen = () => {
                     <H1>CONGRATS</H1>
 
                     <View style={styles.scoreContent}>
-                        {/* TODO: Calculate Score */}
-                        <H2>Your Score: xxx / xxx</H2> 
+                        <H2>Your Score: {score}</H2>
                     </View>
                     <View>
                         {/* TODO: get info on the monument discovered */}
@@ -42,7 +43,7 @@ const ScoreScreen = () => {
             <Footer>
                 <FooterTab>
                     <Button active>
-                        <Text>Score</Text>
+                        <Text>Your score</Text>
                     </Button>
                     <Button>
                         <Text>Leaderboard</Text>
@@ -52,6 +53,10 @@ const ScoreScreen = () => {
         </Container>
     );
 };
+
+const mapStateToProps = (state) => ({
+    score: state.game.score,
+});
 
 const styles = StyleSheet.create({
     container: {
@@ -86,4 +91,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ScoreScreen;
+export default connect(mapStateToProps, null)(ScoreScreen);

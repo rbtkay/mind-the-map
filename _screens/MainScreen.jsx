@@ -15,9 +15,21 @@ import {
 import MapView, { Overlay } from "react-native-maps";
 import { connect } from "react-redux";
 import { NavigationContext } from "@react-navigation/native";
-import { getDistanceFromLatLonInKm } from "../_helpers";
+import {
+    getDistanceFromLatLonInKm,
+    getTimeTakenFromAnimation,
+} from "../_helpers";
+import Timer from "../_components/Timer";
 
-const MainScreen = ({ navigation, monuments }) => {
+const MainScreen = ({
+    navigation,
+    monuments,
+    toggleTimer,
+    resetTimer,
+    value,
+    setScore,
+    setTimerValue,
+}) => {
     LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
 
     const [marker, setMarker] = useState(null);
@@ -28,10 +40,10 @@ const MainScreen = ({ navigation, monuments }) => {
 
     const placeMarker = (e) => {
         if (!isPlaying) return;
-
+        console.log("onPlay - ", value);
         setMarker(e.nativeEvent.coordinate);
         setCorrectMarker(correctMarkerArray[numberOfAttempts]);
-        setIsPlaying(false);
+        toggleTimer(false);
     };
 
     const nextPoi = () => {
@@ -42,53 +54,35 @@ const MainScreen = ({ navigation, monuments }) => {
             setMarker(null);
             setCorrectMarker(null);
             setIsPlaying(true);
+            toggleTimer(true);
         }
     };
 
     useEffect(() => {
-        if (marker) {
-            console.log("marker", marker);
-            console.log("correctMarker", correctMarker);
-            let distanceBetweenPinsInKm = getDistanceFromLatLonInKm(
-                marker.latitude,
-                marker.longitude,
-                correctMarker.latitude,
-                correctMarker.longitude
-            );
-
-            distanceBetweenPinsInKm = Number(
-                distanceBetweenPinsInKm
-            ).toFixed(3);
-
-            console.log(
-                "distanceBetweenPinsInKm - ",
-                distanceBetweenPinsInKm
-            );
-        }
-    }, [marker]);
+        if (!marker || value == 0) return;
+        setIsPlaying(false);
+    }, [marker, value]);
 
     useEffect(() => {
-        // console.log("monuments:", monuments);
+        if (isPlaying) return;
+        console.log(marker);
+        console.log(value);
+        setScore(value, {
+            lat1: marker.latitude,
+            long1: marker.longitude,
+            lat2: correctMarker.latitude,
+            long2: correctMarker.longitude,
+        });
+    }, [isPlaying]);
+
+    useEffect(() => {
         const correctCoordinates = [];
         monuments.forEach((mon) => {
-            // console.log("name", mon.name);
-            // // console.log(mon);
-            // console.log("latitude", mon.latitude_decimal);
-            // if(mon.name == "Lake Annecy"){
-            //     console.log(mon);
-            // }
             correctCoordinates.push({
                 name: mon.name,
                 latitude: mon.latitude_decimal,
                 longitude: mon.longitude_decimal,
             });
-            // setCorrectMarker([
-            //     ...correctMarker,
-            //     {
-            //         latitude: mon.latitude,
-            //         longitude: mon.longitude,
-            //     },
-            // ]);
         });
         setCorrectMarkerArray(correctCoordinates);
     }, []);
@@ -147,7 +141,7 @@ const MainScreen = ({ navigation, monuments }) => {
                         })} */}
                     </MapView>
                     <Overlay style={styles.overlay} image={null}>
-                        {/* <Timer /> */}
+                        {isPlaying && <Timer />}
                         {!isPlaying && (
                             <Button onPress={() => nextPoi()}>
                                 <Text>Next</Text>
@@ -160,10 +154,26 @@ const MainScreen = ({ navigation, monuments }) => {
     );
 };
 
+import { toggleTimer, resetTimer, setTimerValue } from "../_actions/Timer";
+import { setScore } from "../_actions/game";
+
 const mapStateToProps = (state) => ({
     monuments: state.game.monuments,
+    value: state.timer.value,
 });
-
+const mapDispatchToProps = (dispatch) => ({
+    // hideModal: () => dispatch(hideModal()),
+    // showModal: () => dispatch(showModal()),
+    // addIngredient: (ingredient) => dispatch(addIngredient(ingredient)),
+    // addIngredientToDatabase: (ingredient) =>
+    //     addIngredientToDatabase(ingredient),
+    // setMessage: (message) => dispatch(setMessage(message)),
+    toggleTimer: (isRunning) => dispatch(toggleTimer(isRunning)),
+    resetTimer: () => dispatch(resetTimer()),
+    setTimerValue: (value) => dispatch(setTimerValue(value)),
+    setScore: (animated_value, coordinates) =>
+        dispatch(setScore(animated_value, coordinates)),
+});
 const styles = {
     container: {
         flex: 1,
@@ -182,7 +192,7 @@ const styles = {
     },
 };
 
-export default connect(mapStateToProps, null)(MainScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(MainScreen);
 
 // customMapStyle={[
 //     {

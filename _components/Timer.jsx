@@ -4,31 +4,45 @@ import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { Container, Button } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { connect } from "react-redux";
-import { toggleTimer } from "../_actions/Timer";
+import { toggleTimer, setTimerValue } from "../_actions/Timer";
 
-const Timer = ({ toggleTimer, isRunning }) => {
+const Timer = ({ toggleTimer, isRunning, value, isReset, setTimerValue }) => {
     LogBox.ignoreLogs(["Failed prop type"]);
     const navigation = useNavigation();
 
-    const [fill, setFill] = useState(new Animated.Value(0)); //TODO: user ref and not state for better rendering
-
+    const [fill, setFill] = useState(new Animated.Value(value)); //TODO: user ref and not state for better rendering
+    console.log("timerValue", value);
+    // fill.setValue(value);
     const navigateTo = (finished, screenToGoTo) => {
         // console.log("screenToGoTo", isRunning);
         if (finished) {
             // console.log(screenToGoTo);
-            navigation.navigate(screenToGoTo);
+            // navigation.navigate(screenToGoTo);
         }
     };
 
-    useEffect(() => {
-        Animated.timing(fill, {
-            toValue: 100,
-            duration: 10000,
-            useNativeDriver: false,
-        }).start();
+    // useEffect(() => {
+    //     console.log("timerValue ", value);
+    //     fill.setValue(value);
+    // }, [value]);
 
-        // toggleTimer(true);
-    });
+    useEffect(() => {
+        console.log("isRunning ", isRunning);
+        if (isRunning) {
+            Animated.timing(fill, {
+                toValue: 100,
+                duration: 10000,
+                useNativeDriver: false,
+            }).start();
+        } else {
+            fill.stopAnimation((value) => {
+                console.log("setting value", value), setTimerValue(value);
+            });
+            fill.setValue(0);
+        }
+    }, [isRunning]);
+
+    // TODO: I might need a reset function for that
 
     return (
         <AnimatedCircularProgress
@@ -48,15 +62,12 @@ const Timer = ({ toggleTimer, isRunning }) => {
 
 const mapStateToProps = (state) => ({
     isRunning: state.timer.isRunning,
+    value: state.timer.value,
+    isReset: state.timer.isReset,
 });
 const mapDispatchToProps = (dispatch) => ({
-    // hideModal: () => dispatch(hideModal()),
-    // showModal: () => dispatch(showModal()),
-    // addIngredient: (ingredient) => dispatch(addIngredient(ingredient)),
-    // addIngredientToDatabase: (ingredient) =>
-    //     addIngredientToDatabase(ingredient),
-    // setMessage: (message) => dispatch(setMessage(message)),
     toggleTimer: (isRunning) => dispatch(toggleTimer(isRunning)),
+    setTimerValue: (value) => dispatch(setTimerValue(value)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Timer);
