@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createRef } from "react";
 import { View, Text, Dimensions, LogBox, Settings } from "react-native";
 import {
     Content,
@@ -21,6 +21,13 @@ import {
 } from "../_helpers";
 import Timer from "../_components/Timer";
 
+const INITIAL_REGION = {
+    latitude: 48.8555, // south / north
+    longitude: 2.34, // west / east
+    latitudeDelta: 0.1,
+    longitudeDelta: 0.16, // zoom in / out
+}
+
 const MainScreen = ({
     navigation,
     monuments,
@@ -38,12 +45,16 @@ const MainScreen = ({
     const [numberOfAttempts, setNumberOfAttemps] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);
 
+    const mapRef = createRef();
+
     const placeMarker = (e) => {
         if (!isPlaying) return;
         console.log("onPlay - ", value);
         setMarker(e.nativeEvent.coordinate);
         setCorrectMarker(correctMarkerArray[numberOfAttempts]);
         toggleTimer(false);
+
+        mapRef.current.animateToRegion(INITIAL_REGION);
     };
 
     const nextPoi = () => {
@@ -108,13 +119,9 @@ const MainScreen = ({
                 <View style={styles.container}>
                     <MapView
                         style={styles.mapStyle}
-                        initialRegion={{
-                            latitude: 48.8555,
-                            longitude: 2.3522,
-                            latitudeDelta: 0.1,
-                            longitudeDelta: 0.13,
-                        }}
+                        initialRegion={INITIAL_REGION}
                         onPress={placeMarker}
+                        ref={mapRef}
                     >
                         {marker && <MapView.Marker coordinate={marker} />}
                         {correctMarker && (
@@ -147,6 +154,13 @@ const MainScreen = ({
                                 <Text>Next</Text>
                             </Button>
                         )}
+                        {/* <View
+                            style={{
+                                backgroundColor: "red",
+                                width: Dimensions.get("window").width,
+                                height: 100,
+                            }}
+                        ></View> */}
                     </Overlay>
                 </View>
             </Content>
