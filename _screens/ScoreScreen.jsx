@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Linking } from "react-native";
 import {
     Content,
     Container,
@@ -15,37 +15,83 @@ import {
     H1,
     FooterTab,
     Footer,
+    ListItem,
+    List,
+    H3,
+    Row,
 } from "native-base";
 import Theme from "../_components/Theme";
 import { connect } from "react-redux";
+import { APP_COLOR } from "../assets/constant_styles";
+import { useNavigation } from "@react-navigation/native";
 
-const ScoreScreen = ({total_score}) => {
-    console.log(total_score);
+const ScoreScreen = ({ total_score, discovered_monuments }) => {
+    const navigation = useNavigation();
     return (
         <Container>
-            <Header>
+            <Header
+                androidStatusBarColor={APP_COLOR}
+                style={{ backgroundColor: APP_COLOR }}
+                iosBarStyle={APP_COLOR}
+            >
                 <Body style={styles.bodyContent}>
                     <Title>Your Score</Title>
                 </Body>
+                <Right
+                    style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "space-evenly",
+                    }}
+                >
+                    <Button transparent>
+                        <Icon name={"refresh"} style={{ color: "white" }} />
+                    </Button>
+                    <Button transparent onPress={() => navigation.replace("HomeScreen")}>
+                        <Icon name={"flame"} style={{ color: "white" }} />
+                    </Button>
+                </Right>
             </Header>
             <Content>
                 <View style={styles.container}>
                     <H1>CONGRATS</H1>
 
                     <View style={styles.scoreContent}>
-                        <H2>Your Score: {total_score}</H2>
+                        <H2>Your Score: {total_score.toFixed(2)}</H2>
                     </View>
-                    <View>
-                        {/* TODO: get info on the monument discovered */}
-                    </View>
+                </View>
+                <View style={styles.monumentList}>
+                    <H3>You've discovered:</H3>
+
+                    <List>
+                        {discovered_monuments.map((monument, i) => {
+                            return (
+                                <ListItem
+                                    key={i}
+                                    style={styles.monumentListItem}
+                                >
+                                    <Text>{monument.name}</Text>
+                                    <Icon
+                                        onPress={() =>
+                                            Linking.openURL(
+                                                `https://en.wikipedia.org/wiki/${monument.name}`
+                                            )
+                                        }
+                                        name="paper-plane"
+                                        style={{ color: APP_COLOR }}
+                                    />
+                                </ListItem>
+                            );
+                        })}
+                    </List>
                 </View>
             </Content>
             <Footer>
                 <FooterTab>
-                    <Button active>
+                    <Button style={{ backgroundColor: APP_COLOR }} active>
                         <Text>Your score</Text>
                     </Button>
-                    <Button>
+                    <Button style={{ backgroundColor: APP_COLOR }}>
                         <Text>Leaderboard</Text>
                     </Button>
                 </FooterTab>
@@ -56,6 +102,7 @@ const ScoreScreen = ({total_score}) => {
 
 const mapStateToProps = (state) => ({
     total_score: state.game.total_score,
+    discovered_monuments: state.game.monuments,
 });
 
 const styles = StyleSheet.create({
@@ -88,6 +135,15 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignContent: "center",
+    },
+    monumentList: {
+        marginTop: 50,
+        marginLeft: 20,
+    },
+    monumentListItem: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
     },
 });
 

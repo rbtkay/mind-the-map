@@ -23,6 +23,7 @@ import Theme from "../_components/Theme";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { AsyncStorage } from "react-native";
+import { APP_COLOR } from "../assets/constant_styles";
 
 const LoginScreen = () => {
     const navigation = useNavigation();
@@ -38,7 +39,7 @@ const LoginScreen = () => {
 
     return (
         <Container>
-            <Header>
+            <Header androidStatusBarColor={APP_COLOR} style={{backgroundColor: APP_COLOR}} iosBarStyle={APP_COLOR}>
                 <Body style={styles.bodyContent}>
                     <Title>Mind the map</Title>
                 </Body>

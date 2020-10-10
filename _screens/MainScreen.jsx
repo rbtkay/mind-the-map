@@ -1,5 +1,12 @@
 import React, { useState, useEffect, createRef } from "react";
-import { View, Text, Dimensions, LogBox, Settings } from "react-native";
+import {
+    View,
+    Text,
+    Dimensions,
+    LogBox,
+    StyleSheet,
+    Image,
+} from "react-native";
 import {
     Content,
     Container,
@@ -20,6 +27,8 @@ import {
     getTimeTakenFromAnimation,
 } from "../_helpers";
 import Timer from "../_components/Timer";
+import Score from "../_components/Score";
+import { APP_COLOR } from "../assets/constant_styles";
 
 const INITIAL_REGION = {
     latitude: 48.8555, // south / north
@@ -28,6 +37,44 @@ const INITIAL_REGION = {
     longitudeDelta: 0.16, // zoom in / out
 };
 
+const customMapStyle = [
+    {
+        featureType: "administrative",
+        elementType: "geometry",
+        stylers: [
+            {
+                visibility: "off",
+            },
+        ],
+    },
+    {
+        featureType: "poi",
+        stylers: [
+            {
+                visibility: "off",
+            },
+        ],
+    },
+    {
+        featureType: "road",
+        elementType: "labels.icon",
+        stylers: [
+            {
+                visibility: "off",
+            },
+        ],
+    },
+    {
+        featureType: "transit",
+        stylers: [
+            {
+                visibility: "off",
+            },
+        ],
+    },
+];
+
+const next_icon = require("../assets/navigation.png");
 const MainScreen = ({
     navigation,
     monuments,
@@ -36,7 +83,7 @@ const MainScreen = ({
     value,
     setScore,
     score,
-    calculateTotalScore
+    calculateTotalScore,
 }) => {
     LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
 
@@ -48,16 +95,6 @@ const MainScreen = ({
 
     const mapRef = createRef();
 
-    // const placeMarker = (e) => {
-    //     if (!isPlaying) return;
-    //     console.log("onPlay - ", value);
-    //     setMarker(e.nativeEvent.coordinate);
-    //     setCorrectMarker(correctMarkerArray[numberOfAttempts]);
-    //     toggleTimer(); // stop timer
-    //     //TODO: setScore here
-    //     // setScore();
-    // };
-
     useEffect(() => {
         if (!marker) return;
 
@@ -67,7 +104,7 @@ const MainScreen = ({
     }, [marker]);
 
     useEffect(() => {
-        if(value == 0) return;
+        if (value == 0) return;
 
         setScore(value, {
             lat1: marker.latitude,
@@ -78,14 +115,14 @@ const MainScreen = ({
         resetTimer();
     }, [value]);
 
-    useEffect(()=>{
-        setIsPlaying(false)
-    },[score])
+    useEffect(() => {
+        setIsPlaying(false);
+    }, [score]);
 
     const nextPoi = () => {
         if (numberOfAttempts >= correctMarkerArray.length - 1) {
             calculateTotalScore();
-            navigation.navigate("ScoreScreen");
+            navigation.replace("ScoreScreen");
         } else {
             setNumberOfAttemps(numberOfAttempts + 1);
             setMarker(null);
@@ -95,27 +132,8 @@ const MainScreen = ({
         }
     };
 
-    //TODO: when game status is resetting make the timer appear back with the map not clickable
-
-    // useEffect(() => {
-    //     if (!marker || value == 0) return;
-    //     setIsPlaying(false);
-    // }, []);
-
-    // useEffect(() => {
-    //     if (isPlaying) return;
-    //     console.log(marker);
-    //     console.log(value);
-    //     setScore(value, {
-    //         lat1: marker.latitude,
-    //         long1: marker.longitude,
-    //         lat2: correctMarker.latitude,
-    //         long2: correctMarker.longitude,
-    //     });
-    // }, [isPlaying]);
-
     useEffect(() => {
-        setIsPlaying(true)
+        setIsPlaying(true);
         const correctCoordinates = [];
         monuments.forEach((mon) => {
             correctCoordinates.push({
@@ -129,7 +147,7 @@ const MainScreen = ({
 
     return (
         <Container>
-            <Header>
+            <Header androidStatusBarColor={APP_COLOR} style={{backgroundColor: APP_COLOR}} iosBarStyle={APP_COLOR}>
                 <Left></Left>
                 <Body>
                     {correctMarkerArray.length > 0 && (
@@ -146,6 +164,7 @@ const MainScreen = ({
                         initialRegion={INITIAL_REGION}
                         onPress={(e) => setMarker(e.nativeEvent.coordinate)}
                         ref={mapRef}
+                        customMapStyle={customMapStyle}
                     >
                         {marker && <MapView.Marker coordinate={marker} />}
                         {correctMarker && (
@@ -173,19 +192,21 @@ const MainScreen = ({
                     </MapView>
                     <Overlay style={styles.overlay} image={null}>
                         {isPlaying && <Timer />}
-                        {/* <Timer/> */}
                         {!isPlaying && (
-                            <Button onPress={() => nextPoi()}>
-                                <Text>Next</Text>
-                            </Button>
+                            <View style={styles.score_view}>
+                                <Score score={score[numberOfAttempts]} />
+                                <View style={{ flex: 2 }}>
+                                    <View style={styles.next_btn}>
+                                        <TouchableOpacity onPress={nextPoi}>
+                                            <Image
+                                                source={next_icon}
+                                                style={styles.next_icon}
+                                            />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
                         )}
-                        {/* <View
-                            style={{
-                                backgroundColor: "red",
-                                width: Dimensions.get("window").width,
-                                height: 100,
-                            }}
-                        ></View> */}
                     </Overlay>
                 </View>
             </Content>
@@ -195,27 +216,23 @@ const MainScreen = ({
 
 import { toggleTimer, resetTimer, setTimerValue } from "../_actions/Timer";
 import { setScore, calculateTotalScore } from "../_actions/game";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const mapStateToProps = (state) => ({
     monuments: state.game.monuments,
     value: state.timer.value,
-    score: state.game.score
+    score: state.game.score,
 });
 const mapDispatchToProps = (dispatch) => ({
-    // hideModal: () => dispatch(hideModal()),
-    // showModal: () => dispatch(showModal()),
-    // addIngredient: (ingredient) => dispatch(addIngredient(ingredient)),
-    // addIngredientToDatabase: (ingredient) =>
-    //     addIngredientToDatabase(ingredient),
-    // setMessage: (message) => dispatch(setMessage(message)),
     toggleTimer: (isRunning) => dispatch(toggleTimer(isRunning)),
     resetTimer: () => dispatch(resetTimer()),
     setTimerValue: (value) => dispatch(setTimerValue(value)),
     setScore: (animated_value, coordinates) =>
         dispatch(setScore(animated_value, coordinates)),
-    calculateTotalScore: () => dispatch(calculateTotalScore())
+    calculateTotalScore: () => dispatch(calculateTotalScore()),
 });
-const styles = {
+
+const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
@@ -227,47 +244,30 @@ const styles = {
         height: Dimensions.get("window").height,
     },
     overlay: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        alignContent: "center",
         position: "absolute",
-        bottom: 100,
-        right: 40,
+        bottom: 50,
+        width: Dimensions.get("window").width,
     },
-};
+    next_btn: {
+        flex: 3,
+        justifyContent: "center",
+        alignItems: "center",
+        transform: [{ rotate: "90deg" }],
+    },
+    score_view: {
+        flex: 1,
+        flexDirection: "row",
+        backgroundColor: APP_COLOR,
+        paddingRight: 10,
+    },
+    next_icon: {
+        width: 100,
+        height: 100,
+    },
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(MainScreen);
-
-// customMapStyle={[
-//     {
-//         featureType: "administrative",
-//         elementType: "geometry",
-//         stylers: [
-//             {
-//                 visibility: "off",
-//             },
-//         ],
-//     },
-//     {
-//         featureType: "poi",
-//         stylers: [
-//             {
-//                 visibility: "off",
-//             },
-//         ],
-//     },
-//     {
-//         featureType: "road",
-//         elementType: "labels.icon",
-//         stylers: [
-//             {
-//                 visibility: "off",
-//             },
-//         ],
-//     },
-//     {
-//         featureType: "transit",
-//         stylers: [
-//             {
-//                 visibility: "off",
-//             },
-//         ],
-//     },
-// ]}

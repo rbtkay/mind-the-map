@@ -1,0 +1,1 @@
+export const APP_COLOR = "#860CE6";

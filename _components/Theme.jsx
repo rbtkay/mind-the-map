@@ -1,34 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import { View, Image, Text } from "react-native";
-// import { TouchableOpacity } from "react-native-gesture-handler";
-
-// // const Theme = ({ name, image }) => {
-// //     if (!name) {
-// //         return null;
-// //     } else {
-// //         return (
-// //             <TouchableOpacity
-// //                 style={{
-// //                     alignContent: "center",
-// //                     justifyContent: "center",
-// //                 }}
-// //                 // onPress={() => navigation.navigate("MainScreen")}
-// //             >
-// //                 <Image
-// //                     source={image}
-// //                     resizeMode="contain"
-// //                     style={{ width: 200, height: 200 }}
-// //                 />
-// //                 <Text style={{ textAlign: "center" }}>{name}</Text>
-// //             </TouchableOpacity>
-// //         );
-// //     }
-// // };
-
-// // export default Theme;
-
-///////////////////////////////
-
 import React, { Component } from "react";
 import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
 import {
@@ -56,6 +25,7 @@ const Theme = ({ image, name, setMonuments, setCity }) => {
     const navigation = useNavigation();
 
     const onPress = () => {
+        console.log("theme_name - ", name); // TODO: use name variable to enter city
         const chosen_ids = [];
         for (let i = 0; i < NUMBER_OF_QUESTION_PER_ROUND; i++) {
             const current_number = `${name}_${Math.floor(Math.random() * 42)}`;
