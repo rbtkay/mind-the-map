@@ -1,8 +1,11 @@
 import "react-native-gesture-handler";
 
-import { StatusBar } from "expo-status-bar";
+import {
+    StatusBar,
+    setStatusBarNetworkActivityIndicatorVisible,
+} from "expo-status-bar";
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, AsyncStorage } from "react-native";
 import { Root, Container } from "native-base";
 import * as Font from "expo-font";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,6 +25,7 @@ const store = createStore(rootReducer);
 
 export default function App() {
     const [fontLoading, setFontLoading] = useState(true);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         (async function () {
@@ -33,51 +37,65 @@ export default function App() {
 
             setFontLoading(false);
         })();
+
+        AsyncStorage.getItem("username", (error, value) => {
+            if (error) {
+                console.log(error);
+                return;
+            }
+            console.log("value - ", value);
+            if (value) setUser(value);
+        });
     }, []);
 
     // wait until the font are loaded
     if (fontLoading) {
         return <View />;
     }
-    
+
     //TODO: make stack screen appear conditional on user
     return (
         <Provider store={store}>
             <Root>
                 <NavigationContainer>
                     <Stack.Navigator>
-                        <Stack.Screen
-                            name="LoginScreen"
-                            options={{
-                                headerShown: false,
-                            }}
-                        >
-                            {(props) => <LoginScreen {...props} />}
-                        </Stack.Screen>
-                        <Stack.Screen
-                            name="ScoreScreen"
-                            options={{
-                                headerShown: false,
-                            }}
-                        >
-                            {(props) => <ScoreScreen {...props} />}
-                        </Stack.Screen>
-                        <Stack.Screen
-                            name="HomeScreen"
-                            options={{
-                                headerShown: false,
-                            }}
-                        >
-                            {(props) => <HomeScreen {...props} />}
-                        </Stack.Screen>
-                        <Stack.Screen
-                            name="MainScreen"
-                            options={{
-                                headerShown: false,
-                            }}
-                        >
-                            {(props) => <MainScreen {...props} />}
-                        </Stack.Screen>
+                        {user ? (
+                            <>
+                                <Stack.Screen
+                                    name="HomeScreen"
+                                    options={{
+                                        headerShown: false,
+                                    }}
+                                >
+                                    {(props) => <HomeScreen {...props} />}
+                                </Stack.Screen>
+                                <Stack.Screen
+                                    name="MainScreen"
+                                    options={{
+                                        headerShown: false,
+                                    }}
+                                >
+                                    {(props) => <MainScreen {...props} />}
+                                </Stack.Screen>
+                                <Stack.Screen
+                                    name="ScoreScreen"
+                                    options={{
+                                        headerShown: false,
+                                    }}
+                                >
+                                    {(props) => <ScoreScreen {...props} />}
+                                </Stack.Screen>
+                            </>
+                        ) : (
+                            <Stack.Screen
+                                name="LoginScreen"
+                                options={{
+                                    headerShown: false,
+                                }}
+                            >
+                                {(props) => <LoginScreen {...props} />}
+                            </Stack.Screen>
+                        )}
                     </Stack.Navigator>
                 </NavigationContainer>
             </Root>
