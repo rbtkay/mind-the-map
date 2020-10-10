@@ -64,7 +64,7 @@ const Theme = ({ image, name, setMonuments, setCity }) => {
         getMonuments(chosen_ids, "Paris").then((monuments) => {
             setMonuments(monuments);
             setCity("Paris");
-            navigation.navigate("MainScreen");
+            navigation.replace("MainScreen");
         });
     };
 

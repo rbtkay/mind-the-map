@@ -26,7 +26,7 @@ const INITIAL_REGION = {
     longitude: 2.34, // west / east
     latitudeDelta: 0.1,
     longitudeDelta: 0.16, // zoom in / out
-}
+};
 
 const MainScreen = ({
     navigation,
@@ -35,7 +35,8 @@ const MainScreen = ({
     resetTimer,
     value,
     setScore,
-    setTimerValue,
+    score,
+    calculateTotalScore
 }) => {
     LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
 
@@ -47,46 +48,74 @@ const MainScreen = ({
 
     const mapRef = createRef();
 
-    const placeMarker = (e) => {
-        if (!isPlaying) return;
-        console.log("onPlay - ", value);
-        setMarker(e.nativeEvent.coordinate);
+    // const placeMarker = (e) => {
+    //     if (!isPlaying) return;
+    //     console.log("onPlay - ", value);
+    //     setMarker(e.nativeEvent.coordinate);
+    //     setCorrectMarker(correctMarkerArray[numberOfAttempts]);
+    //     toggleTimer(); // stop timer
+    //     //TODO: setScore here
+    //     // setScore();
+    // };
+
+    useEffect(() => {
+        if (!marker) return;
+
         setCorrectMarker(correctMarkerArray[numberOfAttempts]);
-        toggleTimer(false);
-
+        toggleTimer(); // stop timer
         mapRef.current.animateToRegion(INITIAL_REGION);
-    };
-
-    const nextPoi = () => {
-        if (numberOfAttempts >= correctMarkerArray.length - 1) {
-            navigation.navigate("ScoreScreen");
-        } else {
-            setNumberOfAttemps(numberOfAttempts + 1);
-            setMarker(null);
-            setCorrectMarker(null);
-            setIsPlaying(true);
-            toggleTimer(true);
-        }
-    };
+    }, [marker]);
 
     useEffect(() => {
-        if (!marker || value == 0) return;
-        setIsPlaying(false);
-    }, [marker, value]);
+        if(value == 0) return;
 
-    useEffect(() => {
-        if (isPlaying) return;
-        console.log(marker);
-        console.log(value);
         setScore(value, {
             lat1: marker.latitude,
             long1: marker.longitude,
             lat2: correctMarker.latitude,
             long2: correctMarker.longitude,
         });
-    }, [isPlaying]);
+        resetTimer();
+    }, [value]);
+
+    useEffect(()=>{
+        setIsPlaying(false)
+    },[score])
+
+    const nextPoi = () => {
+        if (numberOfAttempts >= correctMarkerArray.length - 1) {
+            calculateTotalScore();
+            navigation.navigate("ScoreScreen");
+        } else {
+            setNumberOfAttemps(numberOfAttempts + 1);
+            setMarker(null);
+            setCorrectMarker(null);
+            setIsPlaying(true);
+            toggleTimer();
+        }
+    };
+
+    //TODO: when game status is resetting make the timer appear back with the map not clickable
+
+    // useEffect(() => {
+    //     if (!marker || value == 0) return;
+    //     setIsPlaying(false);
+    // }, []);
+
+    // useEffect(() => {
+    //     if (isPlaying) return;
+    //     console.log(marker);
+    //     console.log(value);
+    //     setScore(value, {
+    //         lat1: marker.latitude,
+    //         long1: marker.longitude,
+    //         lat2: correctMarker.latitude,
+    //         long2: correctMarker.longitude,
+    //     });
+    // }, [isPlaying]);
 
     useEffect(() => {
+        setIsPlaying(true)
         const correctCoordinates = [];
         monuments.forEach((mon) => {
             correctCoordinates.push({
@@ -109,18 +138,13 @@ const MainScreen = ({
                         </Title>
                     )}
                 </Body>
-                {/* <Right>
-                    <Button onPress={() => setCorrectMarker(null)}>
-                        <Text>Next</Text>
-                    </Button>
-                </Right> */}
             </Header>
             <Content>
                 <View style={styles.container}>
                     <MapView
                         style={styles.mapStyle}
                         initialRegion={INITIAL_REGION}
-                        onPress={placeMarker}
+                        onPress={(e) => setMarker(e.nativeEvent.coordinate)}
                         ref={mapRef}
                     >
                         {marker && <MapView.Marker coordinate={marker} />}
@@ -133,7 +157,7 @@ const MainScreen = ({
                                 pinColor={"green"}
                             />
                         )}
-                        {/* TODO: move back to position on every question
+                        {/*
                          {correctMarkerArray.map((mark, i) => {
                             return (
                                 <MapView.Marker
@@ -149,6 +173,7 @@ const MainScreen = ({
                     </MapView>
                     <Overlay style={styles.overlay} image={null}>
                         {isPlaying && <Timer />}
+                        {/* <Timer/> */}
                         {!isPlaying && (
                             <Button onPress={() => nextPoi()}>
                                 <Text>Next</Text>
@@ -169,11 +194,12 @@ const MainScreen = ({
 };
 
 import { toggleTimer, resetTimer, setTimerValue } from "../_actions/Timer";
-import { setScore } from "../_actions/game";
+import { setScore, calculateTotalScore } from "../_actions/game";
 
 const mapStateToProps = (state) => ({
     monuments: state.game.monuments,
     value: state.timer.value,
+    score: state.game.score
 });
 const mapDispatchToProps = (dispatch) => ({
     // hideModal: () => dispatch(hideModal()),
@@ -187,6 +213,7 @@ const mapDispatchToProps = (dispatch) => ({
     setTimerValue: (value) => dispatch(setTimerValue(value)),
     setScore: (animated_value, coordinates) =>
         dispatch(setScore(animated_value, coordinates)),
+    calculateTotalScore: () => dispatch(calculateTotalScore())
 });
 const styles = {
     container: {

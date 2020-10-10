@@ -19,8 +19,8 @@ import {
 import Theme from "../_components/Theme";
 import { connect } from "react-redux";
 
-const ScoreScreen = ({score}) => {
-    console.log(score);
+const ScoreScreen = ({total_score}) => {
+    console.log(total_score);
     return (
         <Container>
             <Header>
@@ -33,7 +33,7 @@ const ScoreScreen = ({score}) => {
                     <H1>CONGRATS</H1>
 
                     <View style={styles.scoreContent}>
-                        <H2>Your Score: {score}</H2>
+                        <H2>Your Score: {total_score}</H2>
                     </View>
                     <View>
                         {/* TODO: get info on the monument discovered */}
@@ -55,7 +55,7 @@ const ScoreScreen = ({score}) => {
 };
 
 const mapStateToProps = (state) => ({
-    score: state.game.score,
+    total_score: state.game.total_score,
 });
 
 const styles = StyleSheet.create({

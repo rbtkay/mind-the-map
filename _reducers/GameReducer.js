@@ -4,9 +4,13 @@ import {
     getDistanceFromLatLonInKm,
     calculatePoints,
 } from "../_helpers";
+import { TIMER_ACTIONS } from "../_actions/Timer";
 
-const game = (state = { monuments: [], city: "", score: 0 }, action) => {
-    let newState;
+const game = (
+    state = { monuments: [], city: "", score: [], total_score: 0 },
+    action
+) => {
+    const { score } = state;
     switch (action.type) {
         case GAME_ACTIONS.SET_MONUMENTS:
             const { monuments } = action;
@@ -15,14 +19,15 @@ const game = (state = { monuments: [], city: "", score: 0 }, action) => {
             const { city } = action;
             return { ...state, city };
         case GAME_ACTIONS.SET_SCORE:
-            const { score } = state;
             const { animation_value, coordinates } = action;
 
+            // get the time it took for the user to set a marker
             const time_taken = getTimeTakenFromAnimation(
                 animation_value,
                 10000
             );
-
+            
+            // get the distance between the marker chosen and the correct one
             const distance_between_pins_in_m = getDistanceFromLatLonInKm(
                 coordinates.lat1,
                 coordinates.long1,
@@ -30,21 +35,17 @@ const game = (state = { monuments: [], city: "", score: 0 }, action) => {
                 coordinates.long2
             );
 
-            const new_score =
-                parseFloat(score) +
-                parseFloat(
-                    calculatePoints(distance_between_pins_in_m, time_taken)
-                );
-            console.log("animation_value", animation_value);
-            console.log("coordinates", coordinates);
-            console.log("score", score);
-            console.log("new_score", new_score);
-            // console.log("time_taken", time_taken);
-            // console.log(
-            //     "distance_between_pins_in_m",
-            //     distance_between_pins_in_m
-            // );
-            return { ...state, score: new_score };
+            // calculate the score of the current round
+            const new_score = parseFloat(
+                calculatePoints(distance_between_pins_in_m, time_taken)
+            );
+
+            return { ...state, score: [...score, new_score] };
+        case GAME_ACTIONS.CALCULATE_TOTAL_SCORE:
+            // sum the scores of different ones into one total_score
+            const total_score = score.reduce((a, b) => a + b, 0);
+            return { ...state, total_score };
+
         default:
             return state;
     }

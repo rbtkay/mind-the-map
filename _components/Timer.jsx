@@ -4,9 +4,9 @@ import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { Container, Button } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { connect } from "react-redux";
-import { toggleTimer, setTimerValue } from "../_actions/Timer";
+import { toggleTimer, setTimerValue, TIMER_STATUS, getReady } from "../_actions/Timer";
 
-const Timer = ({ toggleTimer, isRunning, value, isReset, setTimerValue }) => {
+const Timer = ({ toggleTimer, value, setTimerValue, status, getReady }) => {
     LogBox.ignoreLogs(["Failed prop type"]);
     const navigation = useNavigation();
 
@@ -26,23 +26,48 @@ const Timer = ({ toggleTimer, isRunning, value, isReset, setTimerValue }) => {
     //     fill.setValue(value);
     // }, [value]);
 
+    // useEffect(() => {
+    //     console.log("isRunning ", isRunning);
+    //     if (isRunning) {
+    //         Animated.timing(fill, {
+    //             toValue: 100,
+    //             duration: 10000,
+    //             useNativeDriver: false,
+    //         }).start();
+    //     } else {
+    //         fill.stopAnimation((value) => {
+    //             console.log("setting value", value), setTimerValue(value);
+    //         });
+    //         fill.setValue(0);
+    //     }
+    // }, [isRunning]);
+
     useEffect(() => {
-        console.log("isRunning ", isRunning);
-        if (isRunning) {
+        //TOTEST: this was developped with little testing
+
+        console.log("status - ", status);
+        if (status == TIMER_STATUS.running) {
             Animated.timing(fill, {
                 toValue: 100,
                 duration: 10000,
                 useNativeDriver: false,
             }).start();
-        } else {
+        } else if (status == TIMER_STATUS.paused) {
+        console.log("status - Pausing");
+
             fill.stopAnimation((value) => {
                 console.log("setting value", value), setTimerValue(value);
             });
+        } else if (status == TIMER_STATUS.resetting) {
             fill.setValue(0);
+            getReady();
+            // TODO: try resetAnimation(()=> {}) from https://reactnative.dev/docs/animatedvaluexy#setvalue
+            //TODO: set time out and maybe animation for reset 
         }
-    }, [isRunning]);
-
-    // TODO: I might need a reset function for that
+        else if(status == TIMER_STATUS.atzero) {
+            toggleTimer(); // starts the timer when the player land on the map
+        }
+    }, [status]);
 
     return (
         <AnimatedCircularProgress
@@ -63,11 +88,12 @@ const Timer = ({ toggleTimer, isRunning, value, isReset, setTimerValue }) => {
 const mapStateToProps = (state) => ({
     isRunning: state.timer.isRunning,
     value: state.timer.value,
-    isReset: state.timer.isReset,
+    status: state.timer.status,
 });
 const mapDispatchToProps = (dispatch) => ({
     toggleTimer: (isRunning) => dispatch(toggleTimer(isRunning)),
     setTimerValue: (value) => dispatch(setTimerValue(value)),
+    getReady: () => dispatch(getReady()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Timer);

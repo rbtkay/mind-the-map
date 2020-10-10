@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Dimensions, StyleSheet, Image } from "react-native";
+import { View, Dimensions, StyleSheet, Image, Linking } from "react-native";
 import {
     Content,
     Container,
@@ -17,31 +17,31 @@ import {
     Form,
     Input,
     Item,
+    H1,
 } from "native-base";
 import Theme from "../_components/Theme";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
-import { AsyncStorage } from 'react-native';
+import { AsyncStorage } from "react-native";
 
 const LoginScreen = () => {
     const navigation = useNavigation();
 
-    const onLoginPress = async() => {
+    const onLoginPress = async () => {
         try {
-            await AsyncStorage.setItem(
-              'username',
-              'Rbtkay'
-            );
-          } catch (error) {
+            await AsyncStorage.setItem("username", "Rbtkay");
+        } catch (error) {
             console.log(error);
-          } 
+        }
         navigation.navigate("HomeScreen");
     };
 
     return (
         <Container>
             <Header>
-                <Body></Body>
+                <Body style={styles.bodyContent}>
+                    <Title>Mind the map</Title>
+                </Body>
             </Header>
             <View style={{ flex: 6 }}>
                 <View style={styles.image}>
@@ -52,7 +52,7 @@ const LoginScreen = () => {
                             width: "100%",
                             height: "100%", //Dimensions.get("window").height / 3,
                         }}
-                        />
+                    />
                 </View>
                 <H2 style={styles.title}>Welcome Back!</H2>
                 <Form style={styles.form}>
@@ -62,7 +62,7 @@ const LoginScreen = () => {
                             // value={"email"}
                             // onChangeText={(text) => setEmail(text)}
                             autoCapitalize="none"
-                            />
+                        />
                     </Item>
                 </Form>
 
@@ -70,6 +70,13 @@ const LoginScreen = () => {
                     <Button onPress={() => onLoginPress()}>
                         <Text>Login</Text>
                     </Button>
+
+                    <Text
+                        style={{ color: "blue" }}
+                        onPress={() => Linking.openURL("http://wikipedia.com")}
+                    >
+                        Google
+                    </Text>
                     {/* <TouchableOpacity style={{ paddingTop: 10 }}>
                         <Text> New member ?</Text>
                     </TouchableOpacity> */}
@@ -92,6 +99,12 @@ const styles = StyleSheet.create({
     },
     form: {
         flex: 1,
+    },
+    bodyContent: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignContent: "center",
     },
 });
 
