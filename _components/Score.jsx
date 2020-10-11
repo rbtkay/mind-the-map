@@ -2,11 +2,13 @@ import React from "react";
 
 import { StyleSheet, View, Image } from "react-native";
 import { Text } from "native-base";
+import { connect } from "react-redux";
 
 const distance_icon = require("../assets/distance.png");
 const time_icon = require("../assets/stopwatch.png");
 
-const Score = ({score}) => {
+const Score = ({ score, round_distance, round_time }) => {
+    console.log(round_time, round_distance, "!!!");
     return (
         <View style={{ flex: 5, paddingLeft: 25 }}>
             <View
@@ -36,7 +38,7 @@ const Score = ({score}) => {
                             marginLeft: 5,
                         }}
                     >
-                        {"distance"}m
+                        {parseFloat(round_distance).toFixed(0)}m
                     </Text>
                 </View>
             </View>
@@ -63,7 +65,7 @@ const Score = ({score}) => {
                             marginLeft: 5,
                         }}
                     >
-                        {"time"}s
+                        {(parseFloat(round_time) / 1000).toFixed(2)}s
                     </Text>
                 </View>
             </View>
@@ -86,7 +88,7 @@ const Score = ({score}) => {
                             textAlign: "center",
                             textAlignVertical: "center",
                             fontSize: 24,
-                            paddingBottom: 50
+                            paddingBottom: 50,
                         }}
                     >
                         Score: {score}
@@ -97,6 +99,11 @@ const Score = ({score}) => {
     );
 };
 
+const mapStateToProps = (state) => ({
+    round_distance: state.game.round_distance_in_m,
+    round_time: state.game.round_time,
+});
+
 const styles = StyleSheet.create({
     icon_image: {
         width: 50,
@@ -104,4 +111,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Score;
+export default connect(mapStateToProps, null)(Score);

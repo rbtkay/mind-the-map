@@ -53,7 +53,6 @@ export default function App() {
         return <View />;
     }
 
-    //TODO: make stack screen appear conditional on user
     return (
         <Provider store={store}>
             <Root>

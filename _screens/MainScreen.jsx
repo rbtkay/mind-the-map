@@ -84,6 +84,8 @@ const MainScreen = ({
     setScore,
     score,
     calculateTotalScore,
+    startTimer,
+    timer,
 }) => {
     LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
 
@@ -133,6 +135,8 @@ const MainScreen = ({
     };
 
     useEffect(() => {
+        if (!monuments) return;
+
         setIsPlaying(true);
         const correctCoordinates = [];
         monuments.forEach((mon) => {
@@ -143,11 +147,17 @@ const MainScreen = ({
             });
         });
         setCorrectMarkerArray(correctCoordinates);
+
+        if (timer.status == TIMER_STATUS.ready) startTimer();
     }, []);
 
     return (
         <Container>
-            <Header androidStatusBarColor={APP_COLOR} style={{backgroundColor: APP_COLOR}} iosBarStyle={APP_COLOR}>
+            <Header
+                androidStatusBarColor={APP_COLOR}
+                style={{ backgroundColor: APP_COLOR }}
+                iosBarStyle={APP_COLOR}
+            >
                 <Left></Left>
                 <Body>
                     {correctMarkerArray.length > 0 && (
@@ -192,7 +202,7 @@ const MainScreen = ({
                     </MapView>
                     <Overlay style={styles.overlay} image={null}>
                         {isPlaying && <Timer />}
-                        {!isPlaying && (
+                        {!isPlaying && score && (
                             <View style={styles.score_view}>
                                 <Score score={score[numberOfAttempts]} />
                                 <View style={{ flex: 2 }}>
@@ -214,13 +224,20 @@ const MainScreen = ({
     );
 };
 
-import { toggleTimer, resetTimer, setTimerValue } from "../_actions/Timer";
+import {
+    toggleTimer,
+    resetTimer,
+    setTimerValue,
+    TIMER_STATUS,
+    startTimer,
+} from "../_actions/Timer";
 import { setScore, calculateTotalScore } from "../_actions/game";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 const mapStateToProps = (state) => ({
     monuments: state.game.monuments,
     value: state.timer.value,
+    timer: state.timer,
     score: state.game.score,
 });
 const mapDispatchToProps = (dispatch) => ({
@@ -230,6 +247,7 @@ const mapDispatchToProps = (dispatch) => ({
     setScore: (animated_value, coordinates) =>
         dispatch(setScore(animated_value, coordinates)),
     calculateTotalScore: () => dispatch(calculateTotalScore()),
+    startTimer: () => dispatch(startTimer()),
 });
 
 const styles = StyleSheet.create({

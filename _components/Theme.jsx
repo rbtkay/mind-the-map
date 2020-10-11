@@ -16,30 +16,29 @@ import {
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { connect } from "react-redux";
-import { getMonuments } from "../_api/pois";
-import { setMonuments, setCity } from "../_actions/game";
+import { setCity } from "../_actions/game";
 
-const NUMBER_OF_QUESTION_PER_ROUND = 5;
 
-const Theme = ({ image, name, setMonuments, setCity }) => {
+const Theme = ({ image, name, setCity }) => {
     const navigation = useNavigation();
 
     const onPress = () => {
         console.log("theme_name - ", name); // TODO: use name variable to enter city
-        const chosen_ids = [];
-        for (let i = 0; i < NUMBER_OF_QUESTION_PER_ROUND; i++) {
-            const current_number = `${name}_${Math.floor(Math.random() * 42)}`;
-            chosen_ids.push(current_number);
-        }
-        getMonuments(chosen_ids, "Paris").then((monuments) => {
-            setMonuments(monuments);
-            setCity("Paris");
-            navigation.replace("MainScreen");
-        });
+        // const chosen_ids = [];
+        // for (let i = 0; i < NUMBER_OF_QUESTION_PER_ROUND; i++) {
+        //     const current_number = `${name}_${Math.floor(Math.random() * 42)}`;
+        //     chosen_ids.push(current_number);
+        // }
+        setCity("Paris");
+        // navigation.replace("MainScreen");
+        // getMonuments(chosen_ids, "Paris").then((monuments) => { // TODO: this function needs to be on the MainScreen since it is also called on replay game
+        //     setMonuments(monuments);
+        //     setCity("Paris");
+        // });
     };
 
     return (
-        <TouchableOpacity style={styles.th_container} onPress={onPress}>
+        <TouchableOpacity style={styles.th_container} onPress={()=> setCity("Paris")}>
             <Card>
                 <CardItem cardBody bordered>
                     <Body>
@@ -65,7 +64,6 @@ const mapStateToProps = (state) => ({
     monuments: state.monuments,
 });
 const mapDispatchToProps = (dispatch) => ({
-    setMonuments: (monuments) => dispatch(setMonuments(monuments)),
     setCity: (city) => dispatch(setCity(city)),
 });
 

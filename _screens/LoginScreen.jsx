@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Dimensions, StyleSheet, Image, Linking } from "react-native";
 import {
     Content,
@@ -27,10 +27,16 @@ import { APP_COLOR } from "../assets/constant_styles";
 
 const LoginScreen = () => {
     const navigation = useNavigation();
+    const [username, setUsername] = useState(null);
 
     const onLoginPress = async () => {
+        let chosen_username = "user";
+        if (username) chosen_username = username;
         try {
-            await AsyncStorage.setItem("username", "Rbtkay");
+            await AsyncStorage.setItem(
+                "username",
+                `${chosen_username}_${Date.now()}`
+            );
         } catch (error) {
             console.log(error);
         }
@@ -39,7 +45,11 @@ const LoginScreen = () => {
 
     return (
         <Container>
-            <Header androidStatusBarColor={APP_COLOR} style={{backgroundColor: APP_COLOR}} iosBarStyle={APP_COLOR}>
+            <Header
+                androidStatusBarColor={APP_COLOR}
+                style={{ backgroundColor: APP_COLOR }}
+                iosBarStyle={APP_COLOR}
+            >
                 <Body style={styles.bodyContent}>
                     <Title>Mind the map</Title>
                 </Body>
@@ -59,9 +69,9 @@ const LoginScreen = () => {
                 <Form style={styles.form}>
                     <Item>
                         <Input
-                            placeholder="Email or username"
-                            // value={"email"}
-                            // onChangeText={(text) => setEmail(text)}
+                            placeholder="Username"
+                            value={username}
+                            onChangeText={(text) => setUsername(text)}
                             autoCapitalize="none"
                         />
                     </Item>

@@ -16,41 +16,16 @@ const Timer = ({ toggleTimer, value, setTimerValue, status, getReady }) => {
     const navigation = useNavigation();
 
     const [fill, setFill] = useState(new Animated.Value(value)); //TODO: user ref and not state for better rendering
-    console.log("timerValue", value);
     // fill.setValue(value);
     const navigateTo = (finished, screenToGoTo) => {
         // console.log("screenToGoTo", isRunning);
-        if (finished) {
+        if (finished) { 
             // console.log(screenToGoTo);
             // navigation.navigate(screenToGoTo);
         }
     };
 
-    // useEffect(() => {
-    //     console.log("timerValue ", value);
-    //     fill.setValue(value);
-    // }, [value]);
-
-    // useEffect(() => {
-    //     console.log("isRunning ", isRunning);
-    //     if (isRunning) {
-    //         Animated.timing(fill, {
-    //             toValue: 100,
-    //             duration: 10000,
-    //             useNativeDriver: false,
-    //         }).start();
-    //     } else {
-    //         fill.stopAnimation((value) => {
-    //             console.log("setting value", value), setTimerValue(value);
-    //         });
-    //         fill.setValue(0);
-    //     }
-    // }, [isRunning]);
-
     useEffect(() => {
-        //TOTEST: this was developped with little testing
-
-        console.log("status - ", status);
         if (status == TIMER_STATUS.running) {
             Animated.timing(fill, {
                 toValue: 100,
@@ -58,16 +33,12 @@ const Timer = ({ toggleTimer, value, setTimerValue, status, getReady }) => {
                 useNativeDriver: false,
             }).start();
         } else if (status == TIMER_STATUS.paused) {
-            console.log("status - Pausing");
-
             fill.stopAnimation((value) => {
                 console.log("setting value", value), setTimerValue(value);
             });
         } else if (status == TIMER_STATUS.resetting) {
             fill.setValue(0);
             getReady();
-            // TODO: try resetAnimation(()=> {}) from https://reactnative.dev/docs/animatedvaluexy#setvalue
-            //TODO: set time out and maybe animation for reset
         } else if (status == TIMER_STATUS.atzero) {
             toggleTimer(); // starts the timer when the player land on the map
         }
@@ -85,9 +56,9 @@ const Timer = ({ toggleTimer, value, setTimerValue, status, getReady }) => {
                 }
                 backgroundColor="#860CE6"
             >
-                {(fill) => (
+                {/* {(fill) => (
                     <Text>{Number(((100 - fill) / 10).toFixed(2))}</Text>
-                )}
+                )} */}
             </AnimatedCircularProgress>
         </View>
     );

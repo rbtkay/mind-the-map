@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet, Linking } from "react-native";
+import React, { useEffect } from "react";
+import { View, StyleSheet, Linking, AsyncStorage } from "react-native";
 import {
     Content,
     Container,
@@ -24,9 +24,24 @@ import Theme from "../_components/Theme";
 import { connect } from "react-redux";
 import { APP_COLOR } from "../assets/constant_styles";
 import { useNavigation } from "@react-navigation/native";
+import { addScoreWithUser } from "../_api/scores";
 
-const ScoreScreen = ({ total_score, discovered_monuments }) => {
+const ScoreScreen = ({ total_score, discovered_monuments, replayGame }) => {
     const navigation = useNavigation();
+
+    useEffect(() => {
+        (async () => {
+            if (!total_score) return;
+            const username = await AsyncStorage.getItem("username");
+
+            // if (value !== null) {
+            //   // We have data!! 
+            addScoreWithUser(username, total_score);
+            console.log(username);
+            // }
+        })();
+    }, [total_score]);
+
     return (
         <Container>
             <Header
@@ -44,10 +59,22 @@ const ScoreScreen = ({ total_score, discovered_monuments }) => {
                         justifyContent: "space-evenly",
                     }}
                 >
-                    <Button transparent>
+                    <Button
+                        transparent
+                        onPress={() => {
+                            replayGame("Paris");
+                            navigation.replace("HomeScreen");
+                        }}
+                    >
                         <Icon name={"refresh"} style={{ color: "white" }} />
                     </Button>
-                    <Button transparent onPress={() => navigation.replace("HomeScreen")}>
+                    <Button
+                        transparent
+                        onPress={() => {
+                            replayGame();
+                            navigation.replace("HomeScreen");
+                        }}
+                    >
                         <Icon name={"flame"} style={{ color: "white" }} />
                     </Button>
                 </Right>
@@ -100,9 +127,15 @@ const ScoreScreen = ({ total_score, discovered_monuments }) => {
     );
 };
 
+import { replayGame, setCity } from "../_actions/game";
 const mapStateToProps = (state) => ({
     total_score: state.game.total_score,
     discovered_monuments: state.game.monuments,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+    setCity: (city) => dispatch(setCity(city)),
+    replayGame: (city) => dispatch(replayGame(city)),
 });
 
 const styles = StyleSheet.create({
@@ -147,4 +180,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default connect(mapStateToProps, null)(ScoreScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(ScoreScreen);

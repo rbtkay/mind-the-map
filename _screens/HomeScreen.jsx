@@ -19,6 +19,13 @@ import Theme from "../_components/Theme";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { AsyncStorage } from "react-native";
 import { APP_COLOR } from "../assets/constant_styles";
+import { useNavigation } from "@react-navigation/native";
+import { connect } from "react-redux";
+import { getMonuments } from "../_api/pois";
+import { disableExpoCliLogging } from "expo/build/logs/Logs";
+import { setMonuments } from "../_actions/game";
+import { addScoreWithUser } from "../_api/scores";
+const NUMBER_OF_QUESTION_PER_ROUND = 5;
 
 const themes = [
     {
@@ -47,22 +54,35 @@ const Row = ({ themes, index }) => {
     );
 };
 
-const HomeScreen = () => {
+const HomeScreen = ({ city, setMonuments }) => {
+    const navigation = useNavigation();
+    console.log(city);
     useEffect(() => {
-        (async function () {
-            try {
-                const value = await AsyncStorage.getItem("username");
-                if (value !== null) {
-                    console.log(value);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        })();
-    });
+        if (!city) return;
+        const chosen_ids = [];
+        let current_number = -1;
+        for (let i = 0; i < NUMBER_OF_QUESTION_PER_ROUND; i++) {
+            do {
+                // this dowhile is to prevent duplicates
+                current_number = `${city}_${Math.floor(Math.random() * 42)}`;
+            } while (chosen_ids.includes(current_number));
+            chosen_ids.push(current_number);
+        }
+
+        getMonuments(chosen_ids, "Paris").then((monuments) => {
+            // TODO: this function needs to be on the MainScreen since it is also called on replay game
+            setMonuments(monuments);
+            navigation.replace("MainScreen");
+        });
+    }, [city]);
+
     return (
         <Container>
-            <Header androidStatusBarColor={APP_COLOR} style={{backgroundColor: APP_COLOR}} iosBarStyle={APP_COLOR}>
+            <Header
+                androidStatusBarColor={APP_COLOR}
+                style={{ backgroundColor: APP_COLOR }}
+                iosBarStyle={APP_COLOR}
+            >
                 <Body style={styles.bodyContent}>
                     <Title>Choose a city</Title>
                 </Body>
@@ -93,7 +113,6 @@ const HomeScreen = () => {
     );
 };
 
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -119,4 +138,12 @@ const styles = StyleSheet.create({
     },
 });
 
-export default HomeScreen;
+const mapStateToProps = (state) => ({
+    city: state.game.city,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+    setMonuments: (monuments) => dispatch(setMonuments(monuments)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
