@@ -23,36 +23,44 @@ exports.getScoresOrderByScore = () => {
     return new Promise((resolve, reject) => {
         const scores = [];
         scoresRef
-            .orderBy("score")
-            .get()
-            .then((querySnapshot) => {})
-            .catch(() => {});
-    });
-};
-exports.getScoresByUserOrderByScore = (username) => {
-    return new Promise((resolve, reject) => {
-        scoresRef
-            .where("username", "==", username)
-            .orderBy("score")
+            .orderBy("score", "desc")
+            .limit(10)
             .get()
             .then((querySnapshot) => {
                 querySnapshot.forEach((doc) => {
-                    monuments.push(doc.data());
+                    scores.push(doc.data());
                 });
-                resolve(monuments);
+                resolve(scores);
             })
             .catch((err) => {
                 reject(err);
             });
     });
 };
+// exports.getScoresByUserOrderByScore = (username) => {
+//     return new Promise((resolve, reject) => {
+//         scoresRef
+//             .where("username", "==", username)
+//             .orderBy("score")
+//             .get()
+//             .then((querySnapshot) => {
+//                 querySnapshot.forEach((doc) => {
+//                     monuments.push(doc.data());
+//                 });
+//                 resolve(monuments);
+//             })
+//             .catch((err) => {
+//                 reject(err);
+//             });
+//     });
+// };
 
 exports.addScoreWithUser = (username, score) => {
     return new Promise((resolve, reject) => {
         scoresRef.add({
             username,
             score,
-            date: new Date().toGMTString()
-        })
+            date: new Date().toGMTString(),
+        });
     });
 };
