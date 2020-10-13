@@ -10,10 +10,11 @@ export const setCity = (city) => ({
 	city,
 });
 
-export const setScore = (animation_value, coordinates) => ({
+export const setScore = (animation_value, coordinates, is_time_done = false) => ({
 	type: GAME_ACTIONS.SET_SCORE,
 	animation_value,
-	coordinates
+	coordinates,
+	is_time_done
 });
 
 export const calculateTotalScore = () => ({

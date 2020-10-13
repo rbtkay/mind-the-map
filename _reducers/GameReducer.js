@@ -6,7 +6,15 @@ import {
 } from "../_helpers";
 
 const game = (
-    state = { monuments: [], city: "", score: [], total_score: 0, round_distance_in_m: 0, round_time: 0 },
+    state = {
+        monuments: [],
+        city: "",
+        score: [],
+        total_score: 0,
+        round_distance_in_m: 0,
+        round_time: 0,
+        is_time_done: false
+    },
     action
 ) => {
     const { score, city } = state;
@@ -19,7 +27,14 @@ const game = (
             console.log("in reducer - ", city);
             return { ...state, city };
         case GAME_ACTIONS.SET_SCORE:
-            const { animation_value, coordinates } = action;
+            const { animation_value, coordinates, is_time_done } = action;
+
+            if (is_time_done)
+                return {
+                    ...state,
+                    score: [...score, 0],
+                    is_time_done: true
+                };
 
             // get the time it took for the user to set a marker
             const round_time = getTimeTakenFromAnimation(
@@ -44,7 +59,13 @@ const game = (
             console.log("time: ", round_time);
             console.log("distance: ", round_distance_in_m);
 
-            return { ...state, score: [...score, new_score], round_time, round_distance_in_m };
+            return {
+                ...state,
+                score: [...score, new_score],
+                round_time,
+                round_distance_in_m,
+                is_time_done: false
+            };
         case GAME_ACTIONS.CALCULATE_TOTAL_SCORE:
             // sum the scores of different ones into one total_score
             const total_score = score.reduce((a, b) => a + b, 0);
@@ -52,7 +73,14 @@ const game = (
 
         case GAME_ACTIONS.REPLAY_GAME:
             console.log("replaying game");
-            return { city, monuments: [], score: [], total_score: 0, round_distance_in_m: 0, round_time: 0};
+            return {
+                city,
+                monuments: [],
+                score: [],
+                total_score: 0,
+                round_distance_in_m: 0,
+                round_time: 0,
+            };
         default:
             return state;
     }

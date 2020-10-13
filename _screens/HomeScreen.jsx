@@ -56,7 +56,6 @@ const Row = ({ themes, index }) => {
 
 const HomeScreen = ({ city, setMonuments }) => {
     const navigation = useNavigation();
-    console.log(city);
     useEffect(() => {
         if (!city) return;
         const chosen_ids = [];
@@ -70,7 +69,6 @@ const HomeScreen = ({ city, setMonuments }) => {
         }
 
         getMonuments(chosen_ids, "Paris").then((monuments) => {
-            // TODO: this function needs to be on the MainScreen since it is also called on replay game
             setMonuments(monuments);
             navigation.replace("MainScreen");
         });

@@ -24,18 +24,22 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { AsyncStorage } from "react-native";
 import { APP_COLOR } from "../assets/constant_styles";
+import { connect } from "react-redux";
 
-const LoginScreen = () => {
+const LoginScreen = ({registerUser}) => {
     const navigation = useNavigation();
     const [username, setUsername] = useState(null);
 
     const onLoginPress = async () => {
         let chosen_username = "user";
         if (username) chosen_username = username;
+        chosen_username = `${chosen_username}_${Date.now()}`
         try {
+            console.log("chosen_username", chosen_username)
+            registerUser(chosen_username);
             await AsyncStorage.setItem(
                 "username",
-                `${chosen_username}_${Date.now()}`
+                chosen_username
             );
         } catch (error) {
             console.log(error);
@@ -81,16 +85,6 @@ const LoginScreen = () => {
                     <Button onPress={() => onLoginPress()}>
                         <Text>Login</Text>
                     </Button>
-
-                    <Text
-                        style={{ color: "blue" }}
-                        onPress={() => Linking.openURL("http://wikipedia.com")}
-                    >
-                        Google
-                    </Text>
-                    {/* <TouchableOpacity style={{ paddingTop: 10 }}>
-                        <Text> New member ?</Text>
-                    </TouchableOpacity> */}
                 </View>
             </View>
         </Container>
@@ -119,4 +113,9 @@ const styles = StyleSheet.create({
     },
 });
 
-export default LoginScreen;
+import { registerUser } from "../_actions/user";
+const mapDispatchToProps = (dispatch) =>({
+    registerUser: (username) => dispatch(registerUser(username))
+})
+
+export default connect(null, mapDispatchToProps)(LoginScreen);

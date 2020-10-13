@@ -24,11 +24,11 @@ exports.getDistanceFromLatLonInKm = (lat1, lon1, lat2, lon2) => {
     var d = (R * c) * 1000; // Distance in m
     return d;
 };
+function deg2rad(deg) {
+    return deg * (Math.PI / 180);
+}
 
 exports.getTimeTakenFromAnimation = (animation_value, total_time_in_ms) => {
     return (parseFloat(animation_value) * parseFloat(total_time_in_ms)) / 100;
 };
 
-function deg2rad(deg) {
-    return deg * (Math.PI / 180);
-}

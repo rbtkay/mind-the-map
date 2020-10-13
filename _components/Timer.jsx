@@ -10,16 +10,18 @@ import {
     TIMER_STATUS,
     getReady,
 } from "../_actions/Timer";
+import { setScore } from "../_actions/game";
 
-const Timer = ({ toggleTimer, value, setTimerValue, status, getReady }) => {
+const Timer = ({ toggleTimer, value, setTimerValue, status, getReady, setScore }) => {
     LogBox.ignoreLogs(["Failed prop type"]);
     const navigation = useNavigation();
 
     const [fill, setFill] = useState(new Animated.Value(value)); //TODO: user ref and not state for better rendering
     // fill.setValue(value);
-    const navigateTo = (finished, screenToGoTo) => {
+    const endTimer = (finished) => {
         // console.log("screenToGoTo", isRunning);
         if (finished) { 
+            setScore(undefined, undefined, true);
             // console.log(screenToGoTo);
             // navigation.navigate(screenToGoTo);
         }
@@ -52,7 +54,7 @@ const Timer = ({ toggleTimer, value, setTimerValue, status, getReady }) => {
                 fill={fill}
                 tintColor="#F8F8F8"
                 onAnimationComplete={({ finished }) =>
-                    navigateTo(finished, "ScoreScreen")
+                    endTimer(finished)
                 }
                 backgroundColor="#860CE6"
             >
@@ -73,6 +75,7 @@ const mapDispatchToProps = (dispatch) => ({
     toggleTimer: (isRunning) => dispatch(toggleTimer(isRunning)),
     setTimerValue: (value) => dispatch(setTimerValue(value)),
     getReady: () => dispatch(getReady()),
+    setScore: (value, coordinates, is_time_done) => dispatch(setScore(value, coordinates, is_time_done)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Timer);

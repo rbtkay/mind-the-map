@@ -17,6 +17,7 @@ import {
     Body,
     Title,
     Right,
+    H2,
 } from "native-base";
 
 import MapView, { Overlay } from "react-native-maps";
@@ -86,6 +87,7 @@ const MainScreen = ({
     calculateTotalScore,
     startTimer,
     timer,
+    is_time_done,
 }) => {
     LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
 
@@ -176,7 +178,12 @@ const MainScreen = ({
                         ref={mapRef}
                         customMapStyle={customMapStyle}
                     >
-                        {marker && <MapView.Marker coordinate={marker} />}
+                        {marker && (
+                            <MapView.Marker
+                                coordinate={marker}
+                                pinColor={APP_COLOR}
+                            />
+                        )}
                         {correctMarker && (
                             <MapView.Marker
                                 coordinate={{
@@ -204,7 +211,13 @@ const MainScreen = ({
                         {isPlaying && <Timer />}
                         {!isPlaying && score && (
                             <View style={styles.score_view}>
-                                <Score score={score[numberOfAttempts]} />
+                                {!is_time_done ? (
+                                    <Score score={score[numberOfAttempts]} />
+                                ) : (
+                                    <View style={{height: 120, flex: 2, justifyContent: 'center', marginLeft: 30}}>
+                                        <H2 style={{color: 'white'}}>You Got Lost!</H2>
+                                    </View>
+                                )}
                                 <View style={{ flex: 2 }}>
                                     <View style={styles.next_btn}>
                                         <TouchableOpacity onPress={nextPoi}>
@@ -239,6 +252,7 @@ const mapStateToProps = (state) => ({
     value: state.timer.value,
     timer: state.timer,
     score: state.game.score,
+    is_time_done: state.game.is_time_done,
 });
 const mapDispatchToProps = (dispatch) => ({
     toggleTimer: (isRunning) => dispatch(toggleTimer(isRunning)),
