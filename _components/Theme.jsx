@@ -17,7 +17,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { connect } from "react-redux";
 import { setCity } from "../_actions/game";
-
+import {BackgroundSound} from "../_helpers/singleton";
 
 const Theme = ({ image, name, setCity }) => {
     const navigation = useNavigation();
@@ -29,7 +29,9 @@ const Theme = ({ image, name, setCity }) => {
         //     const current_number = `${name}_${Math.floor(Math.random() * 42)}`;
         //     chosen_ids.push(current_number);
         // }
+        BackgroundSound.start();
         setCity("Paris");
+
         // navigation.replace("MainScreen");
         // getMonuments(chosen_ids, "Paris").then((monuments) => { // TODO: this function needs to be on the MainScreen since it is also called on replay game
         //     setMonuments(monuments);
@@ -38,7 +40,13 @@ const Theme = ({ image, name, setCity }) => {
     };
 
     return (
-        <TouchableOpacity style={styles.th_container} onPress={()=> setCity("Paris")}>
+        <TouchableOpacity
+            style={styles.th_container}
+            onPress={() => {
+                BackgroundSound.start();
+                setCity("Paris");
+            }}
+        >
             <Card>
                 <CardItem cardBody bordered>
                     <Body>
@@ -51,7 +59,7 @@ const Theme = ({ image, name, setCity }) => {
                             }}
                         />
                         <Button transparent style={{ marginBottom: 0 }}>
-                            <Text>{name}</Text>
+                            <Text style={{ fontSize: 30 }}>{name}</Text>
                         </Button>
                     </Body>
                 </CardItem>

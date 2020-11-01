@@ -15,6 +15,7 @@ const Score = ({ score, round_distance, round_time }) => {
                 style={{
                     flex: 1.25,
                     flexDirection: "row",
+                    marginTop: 10
                 }}
             >
                 <View
@@ -46,6 +47,7 @@ const Score = ({ score, round_distance, round_time }) => {
                 style={{
                     flex: 1.25,
                     flexDirection: "row",
+                    marginTop: 5
                 }}
             >
                 <View style={{ flex: 0.33 }}>
@@ -89,6 +91,7 @@ const Score = ({ score, round_distance, round_time }) => {
                             textAlignVertical: "center",
                             fontSize: 24,
                             paddingBottom: 50,
+                            marginTop: 10
                         }}
                     >
                         Score: {score}

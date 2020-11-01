@@ -29,7 +29,11 @@ import {
 } from "../_helpers";
 import Timer from "../_components/Timer";
 import Score from "../_components/Score";
+import AudioButton from "../_components/AudioButton";
 import { APP_COLOR } from "../assets/constant_styles";
+import { Audio } from "expo-av";
+import {BackgroundSound, STATUS } from "../_helpers/singleton";
+import { ScreenStackHeaderBackButtonImage } from "react-native-screens";
 
 const INITIAL_REGION = {
     latitude: 48.8555, // south / north
@@ -53,6 +57,14 @@ const customMapStyle = [
         stylers: [
             {
                 visibility: "off",
+            },
+        ],
+    },
+    {
+        featureType: "poi.park",
+        stylers: [
+            {
+                visibility: "on",
             },
         ],
     },
@@ -136,7 +148,27 @@ const MainScreen = ({
         }
     };
 
+    
+
     useEffect(() => {
+        // Audio.setAudioModeAsync({
+        //     allowsRecordingIOS: false,
+        //     interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+        //     playsInSilentModeIOS: false,
+        //     interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+        //     shouldDuckAndroid: true,
+        //     staysActiveInBackground: false,
+        //     playThroughEarpieceAndroid: true,
+        // });
+
+        // singleton.getInstance.loadAsync(
+        //     require("../assets/audio/Carefree_background_music.mp3"),
+        //     { shouldPlay: false, isLooping: true, volume: 1.0 },
+        //     false
+        // );
+
+        // console.log(background_sound);
+
         if (!monuments) return;
 
         setIsPlaying(true);
@@ -160,14 +192,16 @@ const MainScreen = ({
                 style={{ backgroundColor: APP_COLOR }}
                 iosBarStyle={APP_COLOR}
             >
-                <Left></Left>
-                <Body>
+                <Body style={{ alignItems: "center" }}>
                     {correctMarkerArray.length > 0 && (
-                        <Title>
+                        <Title style={{ fontSize: 40 }}>
                             {correctMarkerArray[numberOfAttempts].name}
                         </Title>
                     )}
                 </Body>
+                <Left style={{ alignItems: "flex-end" }}>
+                    <AudioButton />
+                </Left>
             </Header>
             <Content>
                 <View style={styles.container}>
@@ -193,19 +227,6 @@ const MainScreen = ({
                                 pinColor={"green"}
                             />
                         )}
-                        {/*
-                         {correctMarkerArray.map((mark, i) => {
-                            return (
-                                <MapView.Marker
-                                    key={i}
-                                    coordinate={{
-                                        latitude: mark.latitude,
-                                        longitude: mark.longitude,
-                                    }}
-                                    pinColor={"green"}
-                                />
-                            );
-                        })} */}
                     </MapView>
                     <Overlay style={styles.overlay} image={null}>
                         {isPlaying && <Timer />}
@@ -214,8 +235,10 @@ const MainScreen = ({
                                 {!is_time_done ? (
                                     <Score score={score[numberOfAttempts]} />
                                 ) : (
-                                    <View style={{height: 120, flex: 2, justifyContent: 'center', marginLeft: 30}}>
-                                        <H2 style={{color: 'white'}}>You Got Lost!</H2>
+                                    <View style={styles.lost_text}>
+                                        <H2 style={{ color: "white" }}>
+                                            You Got Lost!
+                                        </H2>
                                     </View>
                                 )}
                                 <View style={{ flex: 2 }}>
@@ -263,7 +286,6 @@ const mapDispatchToProps = (dispatch) => ({
     calculateTotalScore: () => dispatch(calculateTotalScore()),
     startTimer: () => dispatch(startTimer()),
 });
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -281,7 +303,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
         alignContent: "center",
         position: "absolute",
-        bottom: 50,
+        bottom: 0,
         width: Dimensions.get("window").width,
     },
     next_btn: {
@@ -299,6 +321,12 @@ const styles = StyleSheet.create({
     next_icon: {
         width: 100,
         height: 100,
+    },
+    lost_text: {
+        height: 120,
+        flex: 2,
+        justifyContent: "center",
+        marginLeft: 30,
     },
 });
 

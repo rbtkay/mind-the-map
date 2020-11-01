@@ -24,7 +24,6 @@ const game = (
             return { ...state, monuments };
         case GAME_ACTIONS.SET_CITY:
             const { city } = action;
-            console.log("in reducer - ", city);
             return { ...state, city };
         case GAME_ACTIONS.SET_SCORE:
             const { animation_value, coordinates, is_time_done } = action;
@@ -54,10 +53,6 @@ const game = (
             const new_score = parseFloat(
                 calculatePoints(round_distance_in_m, round_time)
             );
-            console.log("row's score: ", new_score);
-            console.log("score array: ", state.score);
-            console.log("time: ", round_time);
-            console.log("distance: ", round_distance_in_m);
 
             return {
                 ...state,
@@ -72,7 +67,6 @@ const game = (
             return { ...state, total_score };
 
         case GAME_ACTIONS.REPLAY_GAME:
-            console.log("replaying game");
             return {
                 city,
                 monuments: [],

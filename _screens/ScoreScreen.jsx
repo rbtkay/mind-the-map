@@ -25,6 +25,7 @@ import { connect } from "react-redux";
 import { APP_COLOR } from "../assets/constant_styles";
 import { useNavigation, TabActions } from "@react-navigation/native";
 import { addScoreWithUser, getScoresOrderByScore } from "../_api/scores";
+import AudioButton from "../_components/AudioButton";
 
 const TABS = { user_score: "user_score", leaderboard: "leaderboard" };
 
@@ -44,11 +45,7 @@ const ScoreScreen = ({
             if (!total_score) return;
             const username = await AsyncStorage.getItem("username");
 
-            // if (value !== null) {
-            //   // We have data!!
             addScoreWithUser(username, total_score);
-            console.log(username);
-            // }
         })();
     }, [total_score]);
 
@@ -69,33 +66,25 @@ const ScoreScreen = ({
                 iosBarStyle={APP_COLOR}
             >
                 <Body style={styles.bodyContent}>
-                    <Title>Your Score</Title>
+                    <Title style={{ fontSize: 40 }}>Your Score</Title>
                 </Body>
                 <Right
-                    style={{
-                        flex: 1,
-                        flexDirection: "row",
-                        justifyContent: "space-evenly",
-                    }}
+                style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    justifyContent: "space-evenly",
+                }}
                 >
-                    <Button
-                        transparent
+                    <Icon
                         onPress={() => {
+                            BackgroundSound.pause();
                             replayGame("Paris");
                             navigation.replace("HomeScreen");
                         }}
-                    >
-                        <Icon name={"refresh"} style={{ color: "white" }} />
-                    </Button>
-                    <Button
-                        transparent
-                        onPress={() => {
-                            replayGame();
-                            navigation.replace("HomeScreen");
-                        }}
-                    >
-                        <Icon name={"flame"} style={{ color: "white" }} />
-                    </Button>
+                        name={"refresh"}
+                        style={{ color: "white" }}
+                    />
+                    <AudioButton />
                 </Right>
             </Header>
             {tab == TABS.user_score ? (
@@ -174,14 +163,14 @@ const ScoreScreen = ({
                             active
                             onPress={() => setTab(TABS.user_score)}
                         >
-                            <Text>Your score</Text>
+                            <Text style={{ fontSize: 20 }}>Your score</Text>
                         </Button>
                     ) : (
                         <Button
                             style={{ backgroundColor: APP_COLOR }}
                             onPress={() => setTab(TABS.user_score)}
                         >
-                            <Text>Your score</Text>
+                            <Text style={{ fontSize: 20 }}>Your score</Text>
                         </Button>
                     )}
                     {tab == TABS.leaderboard ? (
@@ -190,14 +179,14 @@ const ScoreScreen = ({
                             onPress={() => setTab(TABS.leaderboard)}
                             active
                         >
-                            <Text>Leaderboard</Text>
+                            <Text style={{ fontSize: 20 }}>Leaderboard</Text>
                         </Button>
                     ) : (
                         <Button
                             style={{ backgroundColor: APP_COLOR }}
                             onPress={() => setTab(TABS.leaderboard)}
                         >
-                            <Text>Leaderboard</Text>
+                            <Text style={{ fontSize: 20 }}>Leaderboard</Text>
                         </Button>
                     )}
                 </FooterTab>
@@ -207,6 +196,7 @@ const ScoreScreen = ({
 };
 
 import { replayGame, setCity } from "../_actions/game";
+import BackgroundSound from "../_helpers/singleton";
 const mapStateToProps = (state) => ({
     total_score: state.game.total_score,
     discovered_monuments: state.game.monuments,
@@ -248,6 +238,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignContent: "center",
+        alignItems: "center",
     },
     monumentList: {
         marginTop: 50,

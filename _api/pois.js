@@ -5,7 +5,6 @@ const monumentsRef = firebase.firestore().collection("monuments");
 // filter is an array of ids that will filter the result
 exports.getMonuments = (filter_ids = null, city = null) => {
     return new Promise((resolve, reject) => {
-        console.log("api_filter_ids - ", filter_ids);
         let filter;
         if (filter_ids && city) {
             filter = "both";

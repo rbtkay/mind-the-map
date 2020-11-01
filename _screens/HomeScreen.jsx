@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Dimensions, StyleSheet } from "react-native";
+import { View, Dimensions, StyleSheet, LogBox } from "react-native";
 import {
     Content,
     Container,
@@ -25,6 +25,10 @@ import { getMonuments } from "../_api/pois";
 import { disableExpoCliLogging } from "expo/build/logs/Logs";
 import { setMonuments } from "../_actions/game";
 import { addScoreWithUser } from "../_api/scores";
+import BackgroundSound from "../_helpers/singleton";
+
+const singleton = require("../_helpers/singleton");
+
 const NUMBER_OF_QUESTION_PER_ROUND = 5;
 
 const themes = [
@@ -55,6 +59,8 @@ const Row = ({ themes, index }) => {
 };
 
 const HomeScreen = ({ city, setMonuments }) => {
+    LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
+
     const navigation = useNavigation();
     useEffect(() => {
         if (!city) return;
@@ -69,6 +75,7 @@ const HomeScreen = ({ city, setMonuments }) => {
         }
 
         getMonuments(chosen_ids, "Paris").then((monuments) => {
+            console.log(monuments);
             setMonuments(monuments);
             navigation.replace("MainScreen");
         });
@@ -82,7 +89,7 @@ const HomeScreen = ({ city, setMonuments }) => {
                 iosBarStyle={APP_COLOR}
             >
                 <Body style={styles.bodyContent}>
-                    <Title>Choose a city</Title>
+                    <Title style={{ fontSize: 40 }}>Choose a city</Title>
                 </Body>
             </Header>
             <Content>
@@ -142,6 +149,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
     setMonuments: (monuments) => dispatch(setMonuments(monuments)),
+    startMusic: () => dispatch(startMusic()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);

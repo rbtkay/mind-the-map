@@ -35,7 +35,6 @@ const LoginScreen = ({registerUser}) => {
         if (username) chosen_username = username;
         chosen_username = `${chosen_username}_${Date.now()}`
         try {
-            console.log("chosen_username", chosen_username)
             registerUser(chosen_username);
             await AsyncStorage.setItem(
                 "username",
