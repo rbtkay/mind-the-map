@@ -8,7 +8,6 @@ const distance_icon = require("../assets/distance.png");
 const time_icon = require("../assets/stopwatch.png");
 
 const Score = ({ score, round_distance, round_time }) => {
-    console.log(round_time, round_distance, "!!!");
     return (
         <View style={{ flex: 5, paddingLeft: 25 }}>
             <View

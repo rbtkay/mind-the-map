@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Image, TouchableOpacity, View, StyleSheet } from "react-native";
+import { Image, TouchableOpacity, View, StyleSheet, AsyncStorage } from "react-native";
 import {
     Container,
     Header,
@@ -24,27 +24,23 @@ const Theme = ({ image, name, setCity }) => {
 
     const onPress = () => {
         console.log("theme_name - ", name); // TODO: use name variable to enter city
-        // const chosen_ids = [];
-        // for (let i = 0; i < NUMBER_OF_QUESTION_PER_ROUND; i++) {
-        //     const current_number = `${name}_${Math.floor(Math.random() * 42)}`;
-        //     chosen_ids.push(current_number);
-        // }
         BackgroundSound.start();
         setCity("Paris");
-
-        // navigation.replace("MainScreen");
-        // getMonuments(chosen_ids, "Paris").then((monuments) => { // TODO: this function needs to be on the MainScreen since it is also called on replay game
-        //     setMonuments(monuments);
-        //     setCity("Paris");
-        // });
     };
 
     return (
         <TouchableOpacity
             style={styles.th_container}
-            onPress={() => {
-                BackgroundSound.start();
-                setCity("Paris");
+            onPress={async () => {
+                AsyncStorage.getItem("musicStatus", (error, value) => {
+                    console.log("value", value)
+                    if (error) {
+                        console.log(error);
+                        return;
+                    }
+                    if (value == "on") BackgroundSound.start();
+                    setCity("Paris");
+                });
             }}
         >
             <Card>

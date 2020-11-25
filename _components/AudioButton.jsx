@@ -8,7 +8,6 @@ const AudioButton = () => {
     const [soundIcon, setSoundIcon] = useState(sound_icon_status);
 
     const toggleSound = () => {
-        console.log("status", BackgroundSound.status);
         if (BackgroundSound.status == STATUS.PLAYING) {
             BackgroundSound.pause();
         } else {

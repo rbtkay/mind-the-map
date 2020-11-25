@@ -25,6 +25,7 @@ import { connect } from "react-redux";
 import { APP_COLOR } from "../assets/constant_styles";
 import { useNavigation, TabActions } from "@react-navigation/native";
 import { addScoreWithUser, getScoresOrderByScore } from "../_api/scores";
+import { BackgroundSound } from "../_helpers/singleton";
 import AudioButton from "../_components/AudioButton";
 
 const TABS = { user_score: "user_score", leaderboard: "leaderboard" };
@@ -77,7 +78,7 @@ const ScoreScreen = ({
                 >
                     <Icon
                         onPress={() => {
-                            BackgroundSound.pause();
+                            BackgroundSound.stop();
                             replayGame("Paris");
                             navigation.replace("HomeScreen");
                         }}
@@ -90,10 +91,10 @@ const ScoreScreen = ({
             {tab == TABS.user_score ? (
                 <Content>
                     <View style={styles.container}>
-                        <H1>CONGRATS</H1>
+                        <H1 style={{fontFamily: 'Roboto_medium', fontSize: 42}}>CONGRATS</H1>
 
                         <View style={styles.scoreContent}>
-                            <H2>Your Score: {total_score.toFixed(2)}</H2>
+                            <H2 style={{fontFamily: 'Roboto_medium', fontSize: 38}}>Your Score: {total_score.toFixed(2)}</H2>
                         </View>
                     </View>
                     <View style={styles.monumentList}>
@@ -120,6 +121,9 @@ const ScoreScreen = ({
                                 );
                             })}
                         </List>
+                    </View>
+                    <View style={{ alignItems: 'center', marginTop: 30}}>
+                        <Text style={{fontFamily: 'Roboto_medium', fontSize: 24}}>Any Feedback ?</Text>
                     </View>
                 </Content>
             ) : (
@@ -196,7 +200,6 @@ const ScoreScreen = ({
 };
 
 import { replayGame, setCity } from "../_actions/game";
-import BackgroundSound from "../_helpers/singleton";
 const mapStateToProps = (state) => ({
     total_score: state.game.total_score,
     discovered_monuments: state.game.monuments,
@@ -214,7 +217,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 100,
+        marginTop: 80,
     },
 
     scoreContent: {
