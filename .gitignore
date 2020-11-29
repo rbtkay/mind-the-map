@@ -13,7 +13,7 @@ web-build/
 .DS_Store
 
 #environement
-env.*
+*env.*
 .env
 
 #app configuration -- this should be ommited if the repo is private
