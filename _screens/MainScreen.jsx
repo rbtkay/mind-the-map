@@ -1,189 +1,52 @@
-import React, { useState, useEffect, createRef } from "react";
+import React, { useState } from "react";
 import {
     View,
-    Text,
     Dimensions,
-    LogBox,
     StyleSheet,
     Image,
+    ImageBackground,
 } from "react-native";
 import {
-    Content,
     Container,
     Header,
-    Left,
     Button,
-    Icon,
     Body,
     Title,
-    Right,
-    H2,
+    Text,
+    Content,
+    List,
+    ListItem,
+    Thumbnail,
 } from "native-base";
-
-import MapView, { Overlay } from "react-native-maps";
+import { AsyncStorage, LogBox } from "react-native";
 import { connect } from "react-redux";
-import { NavigationContext } from "@react-navigation/native";
-import {
-    getDistanceFromLatLonInKm,
-    getTimeTakenFromAnimation,
-} from "../_helpers";
-import Timer from "../_components/Timer";
-import Score from "../_components/Score";
-import AudioButton from "../_components/AudioButton";
 import { APP_COLOR } from "../assets/constant_styles";
-import { Audio } from "expo-av";
-import {BackgroundSound, STATUS } from "../_helpers/singleton";
-import { ScreenStackHeaderBackButtonImage } from "react-native-screens";
+import { useNavigation } from "@react-navigation/native";
+import { RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_THREE_GPP } from "expo-av/build/Audio";
+import { setUser } from "../_actions/user";
 
-const INITIAL_REGION = {
-    latitude: 48.8555, // south / north
-    longitude: 2.34, // west / east
-    latitudeDelta: 0.1,
-    longitudeDelta: 0.16, // zoom in / out
-};
-
-const customMapStyle = [
-    {
-        featureType: "administrative",
-        elementType: "geometry",
-        stylers: [
-            {
-                visibility: "off",
-            },
-        ],
-    },
-    {
-        featureType: "poi",
-        stylers: [
-            {
-                visibility: "off",
-            },
-        ],
-    },
-    {
-        featureType: "poi.park",
-        stylers: [
-            {
-                visibility: "on",
-            },
-        ],
-    },
-    {
-        featureType: "road",
-        elementType: "labels.icon",
-        stylers: [
-            {
-                visibility: "off",
-            },
-        ],
-    },
-    {
-        featureType: "transit",
-        stylers: [
-            {
-                visibility: "off",
-            },
-        ],
-    },
-];
-
-const next_icon = require("../assets/navigation.png");
-const MainScreen = ({
-    navigation,
-    monuments,
-    toggleTimer,
-    resetTimer,
-    value,
-    setScore,
-    score,
-    calculateTotalScore,
-    startTimer,
-    timer,
-    is_time_done,
-}) => {
+const MainScreen = ({ user, setUser }) => {
     LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
+    const navigation = useNavigation();
 
-    const [marker, setMarker] = useState(null);
-    const [correctMarker, setCorrectMarker] = useState(null);
-    const [correctMarkerArray, setCorrectMarkerArray] = useState([]);
-    const [numberOfAttempts, setNumberOfAttemps] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(true);
-
-    const mapRef = createRef();
-
-    useEffect(() => {
-        if (!marker) return;
-
-        setCorrectMarker(correctMarkerArray[numberOfAttempts]);
-        toggleTimer(); // stop timer
-        mapRef.current.animateToRegion(INITIAL_REGION);
-    }, [marker]);
-
-    useEffect(() => {
-        if (value == 0) return;
-
-        setScore(value, {
-            lat1: marker.latitude,
-            long1: marker.longitude,
-            lat2: correctMarker.latitude,
-            long2: correctMarker.longitude,
-        });
-        resetTimer();
-    }, [value]);
-
-    useEffect(() => {
-        setIsPlaying(false);
-    }, [score]);
-
-    const nextPoi = () => {
-        if (numberOfAttempts >= correctMarkerArray.length - 1) {
-            calculateTotalScore();
-            navigation.replace("ScoreScreen");
-        } else {
-            setNumberOfAttemps(numberOfAttempts + 1);
-            setMarker(null);
-            setCorrectMarker(null);
-            setIsPlaying(true);
-            toggleTimer();
-        }
+    const challengeSomeone = () => {
+        console.log("clicked");
+        console.log(user);
+        // AsyncStorage.getItem("random_ref", (error, value) => {
+        //     if (error) {
+        //         console.log(error);
+        //         return;
+        //     }
+        //     if (value) console.log("random_ref", value);
+        // });
     };
 
-    
-
-    useEffect(() => {
-        // Audio.setAudioModeAsync({
-        //     allowsRecordingIOS: false,
-        //     interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-        //     playsInSilentModeIOS: false,
-        //     interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-        //     shouldDuckAndroid: true,
-        //     staysActiveInBackground: false,
-        //     playThroughEarpieceAndroid: true,
-        // });
-
-        // singleton.getInstance.loadAsync(
-        //     require("../assets/audio/Carefree_background_music.mp3"),
-        //     { shouldPlay: false, isLooping: true, volume: 1.0 },
-        //     false
-        // );
-
-        // console.log(background_sound);
-
-        if (!monuments) return;
-
-        setIsPlaying(true);
-        const correctCoordinates = [];
-        monuments.forEach((mon) => {
-            correctCoordinates.push({
-                name: mon.name,
-                latitude: mon.latitude_decimal,
-                longitude: mon.longitude_decimal,
-            });
+    const logout = () => {
+        AsyncStorage.clear(() => {
+            setUser({email: null, username: null, random_ref: null});
+            console.log("destroying user");
         });
-        setCorrectMarkerArray(correctCoordinates);
-
-        if (timer.status == TIMER_STATUS.ready) startTimer();
-    }, []);
+    };
 
     return (
         <Container>
@@ -192,142 +55,214 @@ const MainScreen = ({
                 style={{ backgroundColor: APP_COLOR }}
                 iosBarStyle={APP_COLOR}
             >
-                <Body style={{ alignItems: "center" }}>
-                    {correctMarkerArray.length > 0 && (
-                        <Title style={{ fontSize: 40 }}>
-                            {correctMarkerArray[numberOfAttempts].name}
-                        </Title>
-                    )}
+                <Body style={styles.bodyContent}>
+                    <Title style={{ fontSize: 40 }}>Mind the map</Title>
+                    <Button onPress={() => logout()}>
+                        <Text>Logout</Text>
+                    </Button>
                 </Body>
-                <Left style={{ alignItems: "flex-end" }}>
-                    <AudioButton />
-                </Left>
             </Header>
-            <Content>
-                <View style={styles.container}>
-                    <MapView
-                        style={styles.mapStyle}
-                        initialRegion={INITIAL_REGION}
-                        onPress={(e) => setMarker(e.nativeEvent.coordinate)}
-                        ref={mapRef}
-                        customMapStyle={customMapStyle}
+            <Content style={{ backgroundColor: APP_COLOR }}>
+                <View
+                    style={{
+                        backgroundColor: "yellow",
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "flex-start",
+                    }}
+                >
+                    <Thumbnail
+                        square
+                        source={require("../assets/map_example.png")}
+                    />
+                    <View
+                        style={{
+                            flex: 1,
+                            justifyContent: "center",
+                            marginLeft: 20,
+                        }}
                     >
-                        {marker && (
-                            <MapView.Marker
-                                coordinate={marker}
-                                pinColor={APP_COLOR}
-                            />
-                        )}
-                        {correctMarker && (
-                            <MapView.Marker
-                                coordinate={{
-                                    latitude: correctMarker.latitude,
-                                    longitude: correctMarker.longitude,
-                                }}
-                                pinColor={"green"}
-                            />
-                        )}
-                    </MapView>
-                    <Overlay style={styles.overlay} image={null}>
-                        {isPlaying && <Timer />}
-                        {!isPlaying && score && (
-                            <View style={styles.score_view}>
-                                {!is_time_done ? (
-                                    <Score score={score[numberOfAttempts]} />
-                                ) : (
-                                    <View style={styles.lost_text}>
-                                        <H2 style={{ color: "white" }}>
-                                            You Got Lost!
-                                        </H2>
-                                    </View>
-                                )}
-                                <View style={{ flex: 2 }}>
-                                    <View style={styles.next_btn}>
-                                        <TouchableOpacity onPress={nextPoi}>
-                                            <Image
-                                                source={next_icon}
-                                                style={styles.next_icon}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-                                </View>
+                        <Text>Robert</Text>
+                    </View>
+                </View>
+
+                <View
+                    style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        alignContent: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <Button
+                        rounded
+                        style={styles.challenge_opponent_btn}
+                        onPress={() => challengeSomeone()}
+                    >
+                        <Text style={{ fontSize: 30 }}>Challenge Opponent</Text>
+                    </Button>
+                </View>
+                <View style={styles.container_game_btn}>
+                    <View
+                        style={{
+                            width: "80%",
+                            backgroundColor: "red",
+                            borderRadius: 20,
+                        }}
+                    >
+                        <ImageBackground
+                            source={require("../assets/map_example.png")}
+                            style={styles.image_background}
+                        >
+                            <View style={styles.align_center}>
+                                <Button
+                                    style={styles.game_btn}
+                                    onPress={() =>
+                                        navigation.navigate("HomeScreen")
+                                    }
+                                >
+                                    <Text>Single player</Text>
+                                </Button>
+                                <Button style={styles.game_btn}>
+                                    <Text>Invite a friend</Text>
+                                </Button>
                             </View>
-                        )}
-                    </Overlay>
+                            <View style={styles.align_center}>
+                                <Button style={styles.game_btn}>
+                                    <Text>Settings</Text>
+                                </Button>
+                                <Button style={styles.game_btn}>
+                                    <Text>Credits</Text>
+                                </Button>
+                            </View>
+                        </ImageBackground>
+                    </View>
+                </View>
+                <View
+                    style={{
+                        backgroundColor: "white",
+                        borderRadius: 20,
+                        flex: 1,
+                        margin: 20,
+                    }}
+                >
+                    <View
+                        style={{
+                            backgroundColor: "yellow",
+                            flex: 1,
+                            borderTopLeftRadius: 20,
+                            borderTopRightRadius: 20,
+                            flexDirection: "row",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <Text style={{ fontSize: 20 }}>Ongoing Games</Text>
+                    </View>
+                    <View style={{ flex: 5 }}>
+                        <List>
+                            <ListItem>
+                                <View style={styles.list_item}>
+                                    <Thumbnail
+                                        source={require("../assets/map_example.png")}
+                                    />
+                                    <Text>VS Simon</Text>
+                                    <Text>Your turn</Text>
+                                </View>
+                            </ListItem>
+                            <ListItem>
+                                <View style={styles.list_item}>
+                                    <Thumbnail
+                                        source={require("../assets/map_example.png")}
+                                    />
+                                    <Text>VS Simon</Text>
+                                    <Text>Your turn</Text>
+                                </View>
+                            </ListItem>
+                            <ListItem>
+                                <View style={styles.list_item}>
+                                    <Thumbnail
+                                        source={require("../assets/map_example.png")}
+                                    />
+                                    <Text>VS Simon</Text>
+                                    <Text>Your turn</Text>
+                                </View>
+                            </ListItem>
+                        </List>
+                    </View>
                 </View>
             </Content>
         </Container>
     );
 };
 
-import {
-    toggleTimer,
-    resetTimer,
-    setTimerValue,
-    TIMER_STATUS,
-    startTimer,
-} from "../_actions/Timer";
-import { setScore, calculateTotalScore } from "../_actions/game";
-import { TouchableOpacity } from "react-native-gesture-handler";
+const styles = StyleSheet.create({
+    menu: {
+        flex: 3,
+        justifyContent: "space-evenly",
+    },
+    menuBtn: {
+        width: 300,
+        height: 60,
+        justifyContent: "center",
+        alignItems: "center",
+        margin: 50,
+        backgroundColor: APP_COLOR,
+    },
+    title: { textAlign: "center", flex: 2 },
+    menuTxt: {
+        fontSize: 40,
+    },
+    image_background: {
+        flex: 1,
+        resizeMode: "contain",
+        justifyContent: "center",
+    },
+    bodyContent: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "center",
+        alignContent: "center",
+    },
+    profile_pic: {
+        width: 50,
+        height: 50,
+    },
+    challenge_opponent_btn: {
+        width: "90%",
+        height: 80,
+        alignContent: "center",
+        justifyContent: "center",
+        marginTop: 20,
+        backgroundColor: "#0A8754",
+    },
+    game_btn: {
+        margin: 20,
+        width: 100,
+        height: 80,
+        justifyContent: "center",
+        borderRadius: 10,
+        backgroundColor: "#4F5D2F",
+    },
+    align_center: { flex: 1, flexDirection: "row", justifyContent: "center" },
+    list_item: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-around",
+    },
+    container_game_btn: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "center",
+        marginTop: 20,
+    },
+});
 
 const mapStateToProps = (state) => ({
-    monuments: state.game.monuments,
-    value: state.timer.value,
-    timer: state.timer,
-    score: state.game.score,
-    is_time_done: state.game.is_time_done,
+    user: state.user,
 });
-const mapDispatchToProps = (dispatch) => ({
-    toggleTimer: (isRunning) => dispatch(toggleTimer(isRunning)),
-    resetTimer: () => dispatch(resetTimer()),
-    setTimerValue: (value) => dispatch(setTimerValue(value)),
-    setScore: (animated_value, coordinates) =>
-        dispatch(setScore(animated_value, coordinates)),
-    calculateTotalScore: () => dispatch(calculateTotalScore()),
-    startTimer: () => dispatch(startTimer()),
-});
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    mapStyle: {
-        width: Dimensions.get("window").width,
-        height: Dimensions.get("window").height,
-    },
-    overlay: {
-        flex: 1,
-        flexDirection: "row",
-        justifyContent: "flex-end",
-        alignContent: "center",
-        position: "absolute",
-        bottom: 0,
-        width: Dimensions.get("window").width,
-    },
-    next_btn: {
-        flex: 3,
-        justifyContent: "center",
-        alignItems: "center",
-        transform: [{ rotate: "90deg" }],
-    },
-    score_view: {
-        flex: 1,
-        flexDirection: "row",
-        backgroundColor: APP_COLOR,
-        paddingRight: 10,
-    },
-    next_icon: {
-        width: 100,
-        height: 100,
-    },
-    lost_text: {
-        height: 120,
-        flex: 2,
-        justifyContent: "center",
-        marginLeft: 30,
-    },
-});
+
+const mapDispatchToProps = (dispatch)=>({
+    setUser: (user) => dispatch(setUser(user))
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(MainScreen);
