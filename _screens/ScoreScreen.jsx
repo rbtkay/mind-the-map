@@ -32,7 +32,7 @@ const TABS = { user_score: "user_score", leaderboard: "leaderboard" };
 
 const ScoreScreen = ({
     total_score,
-    discovered_monuments,
+    discovered_pois,
     replayGame,
     username,
 }) => {
@@ -44,9 +44,9 @@ const ScoreScreen = ({
     useEffect(() => {
         (async () => {
             if (!total_score) return;
-            const username = await AsyncStorage.getItem("username");
+            const email = await AsyncStorage.getItem("user_email");
 
-            addScoreWithUser(username, total_score);
+            addScoreWithUser(email, total_score);
         })();
     }, [total_score]);
 
@@ -54,7 +54,7 @@ const ScoreScreen = ({
         console.log(tab);
         if (tab == TABS.leaderboard)
             getScoresOrderByScore().then((scores) => {
-                console.log(scores);
+                console.log("scores:", scores);
                 setScores(scores);
             });
     }, [tab]);
@@ -70,17 +70,17 @@ const ScoreScreen = ({
                     <Title style={{ fontSize: 40 }}>Your Score</Title>
                 </Body>
                 <Right
-                style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "space-evenly",
-                }}
+                    style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        justifyContent: "space-evenly",
+                    }}
                 >
                     <Icon
                         onPress={() => {
                             BackgroundSound.stop();
                             replayGame("Paris");
-                            navigation.replace("HomeScreen");
+                            navigation.navigate("MainScreen");
                         }}
                         name={"refresh"}
                         style={{ color: "white" }}
@@ -91,17 +91,30 @@ const ScoreScreen = ({
             {tab == TABS.user_score ? (
                 <Content>
                     <View style={styles.container}>
-                        <H1 style={{fontFamily: 'Roboto_medium', fontSize: 42}}>CONGRATS</H1>
+                        <H1
+                            style={{
+                                fontFamily: "Roboto_medium",
+                                fontSize: 42,
+                            }}
+                        >
+                            CONGRATS
+                        </H1>
 
                         <View style={styles.scoreContent}>
-                            <H2 style={{fontFamily: 'Roboto_medium', fontSize: 38}}>Your Score: {total_score.toFixed(2)}</H2>
+                            <H2
+                                style={{
+                                    fontFamily: "Roboto_medium",
+                                    fontSize: 38,
+                                }}
+                            >
+                                Your Score: {total_score.toFixed(2)}
+                            </H2>
                         </View>
                     </View>
                     <View style={styles.monumentList}>
                         <H3>You've discovered:</H3>
-
                         <List>
-                            {discovered_monuments.map((monument, i) => {
+                            {discovered_pois.map((monument, i) => {
                                 return (
                                     <ListItem
                                         key={i}
@@ -122,8 +135,15 @@ const ScoreScreen = ({
                             })}
                         </List>
                     </View>
-                    <View style={{ alignItems: 'center', marginTop: 30}}>
-                        <Text style={{fontFamily: 'Roboto_medium', fontSize: 24}}>Any Feedback ?</Text>
+                    <View style={{ alignItems: "center", marginTop: 30 }}>
+                        <Text
+                            style={{
+                                fontFamily: "Roboto_medium",
+                                fontSize: 24,
+                            }}
+                        >
+                            Any Feedback ?
+                        </Text>
                     </View>
                 </Content>
             ) : (
@@ -134,11 +154,9 @@ const ScoreScreen = ({
                     <View style={styles.scoreList}>
                         <List>
                             {scores.map((score, i) => {
-                                console.log("username - ", username);
-                                const user =
-                                    score.username.split("_")[0] == "user"
-                                        ? score.username
-                                        : score.username.split("_")[0];
+                                console.log("score - ", score);
+                                const { username: user, email } = score;
+
                                 const user_style =
                                     user == username
                                         ? { color: APP_COLOR }
@@ -202,7 +220,7 @@ const ScoreScreen = ({
 import { replayGame, setCity } from "../_actions/game";
 const mapStateToProps = (state) => ({
     total_score: state.game.total_score,
-    discovered_monuments: state.game.monuments,
+    discovered_pois: state.game.pois,
     username: state.user.username,
 });
 

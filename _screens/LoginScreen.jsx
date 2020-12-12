@@ -26,8 +26,6 @@ const LoginScreen = ({ setUser }) => {
                 "random_ref",
                 userInfo.random_ref.toString()
             );
-            console.log("in login");
-            console.log(userInfo);
             setUser({
                 username: userInfo.username,
                 email: userInfo.email,

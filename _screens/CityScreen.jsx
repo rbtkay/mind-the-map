@@ -15,7 +15,7 @@ import {
     ListItem,
     H1,
 } from "native-base";
-import Theme from "../_components/Theme";
+import Choice from "../_components/Theme";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { AsyncStorage } from "react-native";
 import { APP_COLOR } from "../assets/constant_styles";
@@ -25,61 +25,33 @@ import { getMonuments } from "../_api/pois";
 import { disableExpoCliLogging } from "expo/build/logs/Logs";
 import { setMonuments } from "../_actions/game";
 import { addScoreWithUser } from "../_api/scores";
-import BackgroundSound from "../_helpers/singleton";
+import { getRandomNumberForQuestions } from "../_utils/Randomizer";
+import { cities } from "../_utils/constants";
 
 const singleton = require("../_helpers/singleton");
 
-const NUMBER_OF_QUESTION_PER_ROUND = 5;
 
-const themes = [
-    {
-        name: "Berlin",
-        imageUrl: require("../assets/Berlin.jpg"),
-    },
-    {
-        name: "Paris",
-        imageUrl: require("../assets/Paris.jpeg"),
-    },
-    {
-        name: "London",
-        imageUrl: require("../assets/London.jpeg"),
-    },
-];
-
-const Row = ({ themes, index }) => {
+const Row = ({ cities, index }) => {
     return (
         <View style={{ flex: 2, flexDirection: "row" }}>
-            <Theme
-                name={themes[index - 1].name}
-                image={themes[index - 1].imageUrl}
+            <Choice
+                type={"city"}
+                name={cities[index - 1].name}
+                image={cities[index - 1].imageUrl}
             />
-            <Theme name={themes[index].name} image={themes[index].imageUrl} />
+            <Choice
+                type={"city"}
+                name={cities[index].name}
+                image={cities[index].imageUrl}
+            />
         </View>
     );
 };
 
-const HomeScreen = ({ city, setMonuments }) => {
+const CityScreen = () => {
     LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
 
     const navigation = useNavigation();
-    useEffect(() => {
-        if (!city) return;
-        const chosen_ids = [];
-        let current_number = -1;
-        for (let i = 0; i < NUMBER_OF_QUESTION_PER_ROUND; i++) {
-            do {
-                // this dowhile is to prevent duplicates
-                current_number = `${city}_${Math.floor(Math.random() * 42)}`;
-            } while (chosen_ids.includes(current_number));
-            chosen_ids.push(current_number);
-        }
-
-        getMonuments(chosen_ids, "Paris").then((monuments) => {
-            console.log(monuments);
-            setMonuments(monuments);
-            navigation.replace("MainScreen");
-        });
-    }, [city]);
 
     return (
         <Container>
@@ -92,27 +64,29 @@ const HomeScreen = ({ city, setMonuments }) => {
                     <Title style={{ fontSize: 40 }}>Choose a city</Title>
                 </Body>
             </Header>
-            <Content>
-                <View>
-                    <H1 style={styles.contentHeader}>
-                        Can you locate places on an unlabeled map ?
-                    </H1>
+            <Content style={{ backgroundColor: APP_COLOR }}>
+                <View style={{ marginTop: 150 }}>
+                    {cities.map((th, index) => {
+                        if (index % 2 != 0 && index != 0) {
+                            return (
+                                <Row
+                                    cities={cities}
+                                    index={index}
+                                    key={index}
+                                />
+                            );
+                        } else if (index == cities.length - 1) {
+                            return (
+                                <Choice
+                                    type={"city"}
+                                    name={th.name}
+                                    image={th.imageUrl}
+                                    key={index}
+                                />
+                            );
+                        }
+                    })}
                 </View>
-                {themes.map((th, index) => {
-                    if (index % 2 != 0 && index != 0) {
-                        return (
-                            <Row themes={themes} index={index} key={index} />
-                        );
-                    } else if (index == themes.length - 1) {
-                        return (
-                            <Theme
-                                name={th.name}
-                                image={th.imageUrl}
-                                key={index}
-                            />
-                        );
-                    }
-                })}
             </Content>
         </Container>
     );
@@ -145,6 +119,7 @@ const styles = StyleSheet.create({
 
 const mapStateToProps = (state) => ({
     city: state.game.city,
+    game: state.game
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -152,4 +127,4 @@ const mapDispatchToProps = (dispatch) => ({
     startMusic: () => dispatch(startMusic()),
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
+export default connect(null, null)(CityScreen);

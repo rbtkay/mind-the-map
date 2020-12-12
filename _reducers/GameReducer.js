@@ -7,24 +7,29 @@ import {
 
 const game = (
     state = {
-        monuments: [],
+        pois: [],
         city: "",
+        theme: "",
         score: [],
         total_score: 0,
         round_distance_in_m: 0,
         round_time: 0,
-        is_time_done: false
+        is_time_done: false,
     },
     action
 ) => {
     const { score, city } = state;
     switch (action.type) {
-        case GAME_ACTIONS.SET_MONUMENTS:
-            const { monuments } = action;
-            return { ...state, monuments };
+        case GAME_ACTIONS.SET_POIS:
+            console.log("action", action)
+            const { pois } = action;
+            return { ...state, pois };
         case GAME_ACTIONS.SET_CITY:
             const { city } = action;
             return { ...state, city };
+        case GAME_ACTIONS.SET_THEME:
+            const { theme } = action;
+            return { ...state, theme };
         case GAME_ACTIONS.SET_SCORE:
             const { animation_value, coordinates, is_time_done } = action;
 
@@ -32,7 +37,7 @@ const game = (
                 return {
                     ...state,
                     score: [...score, 0],
-                    is_time_done: true
+                    is_time_done: true,
                 };
 
             // get the time it took for the user to set a marker
@@ -59,7 +64,7 @@ const game = (
                 score: [...score, new_score],
                 round_time,
                 round_distance_in_m,
-                is_time_done: false
+                is_time_done: false,
             };
         case GAME_ACTIONS.CALCULATE_TOTAL_SCORE:
             // sum the scores of different ones into one total_score
@@ -68,8 +73,8 @@ const game = (
 
         case GAME_ACTIONS.REPLAY_GAME:
             return {
-                city,
-                monuments: [],
+                ...state,
+                pois: [],
                 score: [],
                 total_score: 0,
                 round_distance_in_m: 0,

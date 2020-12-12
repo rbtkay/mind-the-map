@@ -4,9 +4,11 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import GameScreen from "./GameScreen";
 import ScoreScreen from "./ScoreScreen";
-import HomeScreen from "./HomeScreen";
+import CityScreen from "./CityScreen";
 import LoginScreen from "./LoginScreen";
+import ThemeScreen from "./ThemeScreen";
 import MainScreen from "./MainScreen";
+import CreateGameScreen from "./CreateGameScreen";
 import { connect } from "react-redux";
 import { firebase } from "../_api/config/firebaseConfig";
 
@@ -68,12 +70,28 @@ const Router = ({ user, setUser }) => {
                                 {(props) => <MainScreen {...props} />}
                             </Stack.Screen>
                             <Stack.Screen
-                                name="HomeScreen"
+                                name="CreateGameScreen"
                                 options={{
                                     headerShown: false,
                                 }}
                             >
-                                {(props) => <HomeScreen {...props} />}
+                                {(props) => <CreateGameScreen {...props} />}
+                            </Stack.Screen>
+                            <Stack.Screen
+                                name="CityScreen"
+                                options={{
+                                    headerShown: false,
+                                }}
+                            >
+                                {(props) => <CityScreen {...props} />}
+                            </Stack.Screen>
+                            <Stack.Screen
+                                name="ThemeScreen"
+                                options={{
+                                    headerShown: false,
+                                }}
+                            >
+                                {(props) => <ThemeScreen {...props} />}
                             </Stack.Screen>
                             <Stack.Screen
                                 name="GameScreen"

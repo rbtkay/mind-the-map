@@ -1,19 +1,25 @@
 export const GAME_ACTIONS = {
-    SET_MONUMENTS: "SET_MONUMENTS",
+    SET_POIS: "SET_POIS",
     SET_CITY: "SET_CITY",
+    SET_THEME: "SET_THEME",
     SET_SCORE: "SET_SCORE",
     CALCULATE_TOTAL_SCORE: "CALCULATE_TOTAL_SCORE",
     REPLAY_GAME: "REPLAY_GAME",
 };
 
-export const setMonuments = (monuments) => ({
-    type: GAME_ACTIONS.SET_MONUMENTS,
-    monuments,
+export const setPois = (pois) => ({
+    type: GAME_ACTIONS.SET_POIS,
+    pois,
 });
 
 export const setCity = (city) => ({
     type: GAME_ACTIONS.SET_CITY,
     city,
+});
+
+export const setTheme = (theme) => ({
+    type: GAME_ACTIONS.SET_THEME,
+    theme,
 });
 
 export const setScore = (

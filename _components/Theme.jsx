@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { Image, TouchableOpacity, View, StyleSheet, AsyncStorage } from "react-native";
+import {
+    Image,
+    TouchableOpacity,
+    View,
+    StyleSheet,
+    AsyncStorage,
+} from "react-native";
 import {
     Container,
     Header,
@@ -16,32 +22,25 @@ import {
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { connect } from "react-redux";
-import { setCity } from "../_actions/game";
-import {BackgroundSound} from "../_helpers/singleton";
+import { setCity, setTheme } from "../_actions/game";
+import { BackgroundSound } from "../_helpers/singleton";
 
-const Theme = ({ image, name, setCity }) => {
+const Choice = ({ type, image, name, setCity, setTheme }) => {
     const navigation = useNavigation();
 
     const onPress = () => {
-        console.log("theme_name - ", name); // TODO: use name variable to enter city
-        BackgroundSound.start();
-        setCity("Paris");
+        if (type == "theme") {
+            setTheme(name);
+        } else if (type == "city") {
+            setCity("Paris");
+        }
+        navigation.navigate("CreateGameScreen");
     };
 
     return (
         <TouchableOpacity
             style={styles.th_container}
-            onPress={async () => {
-                AsyncStorage.getItem("musicStatus", (error, value) => {
-                    console.log("value", value)
-                    if (error) {
-                        console.log(error);
-                        return;
-                    }
-                    if (value == "on") BackgroundSound.start();
-                    setCity("Paris");
-                });
-            }}
+            onPress={async () => onPress()}
         >
             <Card>
                 <CardItem cardBody bordered>
@@ -69,6 +68,7 @@ const mapStateToProps = (state) => ({
 });
 const mapDispatchToProps = (dispatch) => ({
     setCity: (city) => dispatch(setCity(city)),
+    setTheme: (theme) => dispatch(setTheme(theme)),
 });
 
 const styles = StyleSheet.create({
@@ -77,4 +77,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Theme);
+export default connect(mapStateToProps, mapDispatchToProps)(Choice);

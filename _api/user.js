@@ -5,6 +5,8 @@ import { database } from "firebase";
 
 const userRef = firebase.firestore().collection("users");
 
+// TODO: enable signout.
+
 exports.signInWithGoogleAsync = async () => {
     try {
         const result = await Google.logInAsync({
@@ -14,13 +16,32 @@ exports.signInWithGoogleAsync = async () => {
 
         if (result.type === "success") {
             const userInfo = await onSignIn(result);
-            return {token: result.accessToken, userInfo};
+            return { token: result.accessToken, userInfo };
         } else {
             return { cancelled: true };
         }
     } catch (e) {
         return { error: e };
     }
+};
+
+exports.getUserByEmail = (email) => {
+    return new Promise((resolve, reject) => {
+        const user = [];
+        userRef
+            .where("email", "==", email)
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach(doc => {
+                    user.push(doc.data());                    
+                });
+                resolve({user: user[0]});
+            })
+            .catch((error) => {
+                console.log(error);
+                reject(error);
+            });
+    });
 };
 
 const onSignIn = (googleUser) => {
@@ -47,20 +68,31 @@ const onSignIn = (googleUser) => {
                                 // add user to the database
                                 const { profile } = result.additionalUserInfo;
                                 const { email: profile_email } = profile;
-                                await userRef.doc(profile_email).set(profile);
+                                const users = await userRef.get();
+                                const random_ref = users.size;
 
-                                userInfo = {email: profile_email, username: profile.given_name}
+                                await userRef
+                                    .doc(profile_email)
+                                    .set({ ...profile, random_ref });
+
+                                userInfo = {
+                                    email: profile_email,
+                                    username: profile.given_name,
+                                    random_ref,
+                                };
                                 resolve(userInfo);
                             }
                         })
                         .catch(function (error) {
                             console.log(error);
-                            reject("an Error occurred, check the server logs for more info");
+                            reject(
+                                "an Error occurred, check the server logs for more info"
+                            );
                         });
                 } else {
                     const { email } = firebaseUser;
                     const user = await userRef.doc(email).get();
-                    userInfo = { email, username: user.data().given_name }
+                    userInfo = { email, username: user.data().given_name, random_ref: user.data().random_ref };
                     resolve(userInfo);
                 }
             });

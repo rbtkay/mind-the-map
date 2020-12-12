@@ -1,6 +1,6 @@
-export const USER_ACTIONS = { REGISTER_USER: "REGISTER_USER" };
+export const USER_ACTIONS = { SET_USER: "SET_USER", MODIFY_EMAIL: "MODIFY_EMAIL" };
 
-export const registerUser = (username) => ({
-    type: USER_ACTIONS.REGISTER_USER,
-    username
+export const setUser = (user) => ({
+    type: USER_ACTIONS.SET_USER,
+    user
 });

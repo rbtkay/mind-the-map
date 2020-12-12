@@ -14,7 +14,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import MainScreen from "./_screens/MainScreen";
 import ScoreScreen from "./_screens/ScoreScreen";
-import HomeScreen from "./_screens/HomeScreen";
+import CityScreen from "./_screens/CityScreen";
 import LoginScreen from "./_screens/LoginScreen";
 import { Provider, connect } from "react-redux";
 import { createStore } from "redux";

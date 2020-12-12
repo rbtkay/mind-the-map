@@ -1,11 +1,5 @@
-import React, { useState } from "react";
-import {
-    View,
-    Dimensions,
-    StyleSheet,
-    Image,
-    ImageBackground,
-} from "react-native";
+import React, { useState } from 'react';
+import { View, Dimensions, StyleSheet, Image, ImageBackground } from 'react-native';
 import {
     Container,
     Header,
@@ -17,21 +11,28 @@ import {
     List,
     ListItem,
     Thumbnail,
-} from "native-base";
-import { AsyncStorage, LogBox } from "react-native";
-import { connect } from "react-redux";
-import { APP_COLOR } from "../assets/constant_styles";
-import { useNavigation } from "@react-navigation/native";
-import { RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_THREE_GPP } from "expo-av/build/Audio";
-import { setUser } from "../_actions/user";
-
+    Right,
+    Left,
+} from 'native-base';
+import { AsyncStorage, LogBox } from 'react-native';
+import { connect } from 'react-redux';
+import { APP_COLOR } from '../assets/constant_styles';
+import { useNavigation } from '@react-navigation/native';
+import { RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_THREE_GPP } from 'expo-av/build/Audio';
+import { setUser } from '../_actions/user';
+import { SimpleLineIcons } from '@expo/vector-icons';
 const MainScreen = ({ user, setUser }) => {
-    LogBox.ignoreLogs(["Failed prop type", "Setting a timer"]);
+    LogBox.ignoreLogs(['Failed prop type', 'Setting a timer']);
     const navigation = useNavigation();
 
     const challengeSomeone = () => {
-        console.log("clicked");
+        console.log('clicked');
         console.log(user);
+        // TODO: make a page where the challenge / game is created.
+        // reassign randomref to users
+        // challenge someone
+        // retrigger challenge
+
         // AsyncStorage.getItem("random_ref", (error, value) => {
         //     if (error) {
         //         console.log(error);
@@ -43,8 +44,8 @@ const MainScreen = ({ user, setUser }) => {
 
     const logout = () => {
         AsyncStorage.clear(() => {
-            setUser({email: null, username: null, random_ref: null});
-            console.log("destroying user");
+            setUser({ email: null, username: null, random_ref: null });
+            console.log('destroying user');
         });
     };
 
@@ -56,29 +57,29 @@ const MainScreen = ({ user, setUser }) => {
                 iosBarStyle={APP_COLOR}
             >
                 <Body style={styles.bodyContent}>
+                    <Left>
+                        <Button transparent onPress={() => logout()}>
+                            <SimpleLineIcons name="logout" size={24} color="white" />
+                        </Button>
+                    </Left>
                     <Title style={{ fontSize: 40 }}>Mind the map</Title>
-                    <Button onPress={() => logout()}>
-                        <Text>Logout</Text>
-                    </Button>
+                    <Right></Right>
                 </Body>
             </Header>
             <Content style={{ backgroundColor: APP_COLOR }}>
                 <View
                     style={{
-                        backgroundColor: "yellow",
+                        backgroundColor: 'yellow',
                         flex: 1,
-                        flexDirection: "row",
-                        justifyContent: "flex-start",
+                        flexDirection: 'row',
+                        justifyContent: 'flex-start',
                     }}
                 >
-                    <Thumbnail
-                        square
-                        source={require("../assets/map_example.png")}
-                    />
+                    <Thumbnail square source={require('../assets/map_example.png')} />
                     <View
                         style={{
                             flex: 1,
-                            justifyContent: "center",
+                            justifyContent: 'center',
                             marginLeft: 20,
                         }}
                     >
@@ -89,9 +90,9 @@ const MainScreen = ({ user, setUser }) => {
                 <View
                     style={{
                         flex: 1,
-                        flexDirection: "row",
-                        alignContent: "center",
-                        justifyContent: "center",
+                        flexDirection: 'row',
+                        alignContent: 'center',
+                        justifyContent: 'center',
                     }}
                 >
                     <Button
@@ -105,20 +106,20 @@ const MainScreen = ({ user, setUser }) => {
                 <View style={styles.container_game_btn}>
                     <View
                         style={{
-                            width: "80%",
-                            backgroundColor: "red",
+                            width: '80%',
+                            backgroundColor: 'red',
                             borderRadius: 20,
                         }}
                     >
                         <ImageBackground
-                            source={require("../assets/map_example.png")}
+                            source={require('../assets/map_example.png')}
                             style={styles.image_background}
                         >
                             <View style={styles.align_center}>
                                 <Button
                                     style={styles.game_btn}
                                     onPress={() =>
-                                        navigation.navigate("HomeScreen")
+                                        navigation.navigate('CreateGameScreen')
                                     }
                                 >
                                     <Text>Single player</Text>
@@ -140,7 +141,7 @@ const MainScreen = ({ user, setUser }) => {
                 </View>
                 <View
                     style={{
-                        backgroundColor: "white",
+                        backgroundColor: 'white',
                         borderRadius: 20,
                         flex: 1,
                         margin: 20,
@@ -148,12 +149,12 @@ const MainScreen = ({ user, setUser }) => {
                 >
                     <View
                         style={{
-                            backgroundColor: "yellow",
+                            backgroundColor: 'yellow',
                             flex: 1,
                             borderTopLeftRadius: 20,
                             borderTopRightRadius: 20,
-                            flexDirection: "row",
-                            justifyContent: "center",
+                            flexDirection: 'row',
+                            justifyContent: 'center',
                         }}
                     >
                         <Text style={{ fontSize: 20 }}>Ongoing Games</Text>
@@ -163,7 +164,7 @@ const MainScreen = ({ user, setUser }) => {
                             <ListItem>
                                 <View style={styles.list_item}>
                                     <Thumbnail
-                                        source={require("../assets/map_example.png")}
+                                        source={require('../assets/map_example.png')}
                                     />
                                     <Text>VS Simon</Text>
                                     <Text>Your turn</Text>
@@ -172,7 +173,7 @@ const MainScreen = ({ user, setUser }) => {
                             <ListItem>
                                 <View style={styles.list_item}>
                                     <Thumbnail
-                                        source={require("../assets/map_example.png")}
+                                        source={require('../assets/map_example.png')}
                                     />
                                     <Text>VS Simon</Text>
                                     <Text>Your turn</Text>
@@ -181,7 +182,7 @@ const MainScreen = ({ user, setUser }) => {
                             <ListItem>
                                 <View style={styles.list_item}>
                                     <Thumbnail
-                                        source={require("../assets/map_example.png")}
+                                        source={require('../assets/map_example.png')}
                                     />
                                     <Text>VS Simon</Text>
                                     <Text>Your turn</Text>
@@ -198,71 +199,71 @@ const MainScreen = ({ user, setUser }) => {
 const styles = StyleSheet.create({
     menu: {
         flex: 3,
-        justifyContent: "space-evenly",
+        justifyContent: 'space-evenly',
     },
     menuBtn: {
         width: 300,
         height: 60,
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
         margin: 50,
         backgroundColor: APP_COLOR,
     },
-    title: { textAlign: "center", flex: 2 },
+    title: { textAlign: 'center', flex: 2 },
     menuTxt: {
         fontSize: 40,
     },
     image_background: {
         flex: 1,
-        resizeMode: "contain",
-        justifyContent: "center",
+        resizeMode: 'contain',
+        justifyContent: 'center',
     },
     bodyContent: {
         flex: 1,
-        flexDirection: "row",
-        justifyContent: "center",
-        alignContent: "center",
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignContent: 'center',
     },
     profile_pic: {
         width: 50,
         height: 50,
     },
     challenge_opponent_btn: {
-        width: "90%",
+        width: '90%',
         height: 80,
-        alignContent: "center",
-        justifyContent: "center",
+        alignContent: 'center',
+        justifyContent: 'center',
         marginTop: 20,
-        backgroundColor: "#0A8754",
+        backgroundColor: '#0A8754',
     },
     game_btn: {
         margin: 20,
         width: 100,
         height: 80,
-        justifyContent: "center",
+        justifyContent: 'center',
         borderRadius: 10,
-        backgroundColor: "#4F5D2F",
+        backgroundColor: '#4F5D2F',
     },
-    align_center: { flex: 1, flexDirection: "row", justifyContent: "center" },
+    align_center: { flex: 1, flexDirection: 'row', justifyContent: 'center' },
     list_item: {
         flex: 1,
-        flexDirection: "row",
-        justifyContent: "space-around",
+        flexDirection: 'row',
+        justifyContent: 'space-around',
     },
     container_game_btn: {
         flex: 1,
-        flexDirection: "row",
-        justifyContent: "center",
+        flexDirection: 'row',
+        justifyContent: 'center',
         marginTop: 20,
     },
 });
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
     user: state.user,
 });
 
-const mapDispatchToProps = (dispatch)=>({
-    setUser: (user) => dispatch(setUser(user))
-})
+const mapDispatchToProps = dispatch => ({
+    setUser: user => dispatch(setUser(user)),
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(MainScreen);
