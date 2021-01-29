@@ -21,20 +21,16 @@ import {
     Right,
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
-import { connect } from "react-redux";
-import { setCity, setTheme } from "../_actions/game";
-import { BackgroundSound } from "../_helpers/singleton";
+import { useDispatch } from "react-redux";
+import { setDefaultCity } from "../_actions/user";
 
-const Choice = ({ type, image, name, setCity, setTheme }) => {
+const Choice = ({ name, image }) => {
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const onPress = () => {
-        if (type == "theme") {
-            setTheme(name);
-        } else if (type == "city") {
-            setCity("Paris");
-        }
-        navigation.navigate("CreateGameScreen");
+        navigation.navigate("MainScreen");
+        dispatch(setDefaultCity(name))
     };
 
     return (
@@ -63,13 +59,13 @@ const Choice = ({ type, image, name, setCity, setTheme }) => {
     );
 };
 
-const mapStateToProps = (state) => ({
-    monuments: state.monuments,
-});
-const mapDispatchToProps = (dispatch) => ({
-    setCity: (city) => dispatch(setCity(city)),
-    setTheme: (theme) => dispatch(setTheme(theme)),
-});
+// const mapStateToProps = (state) => ({
+//     monuments: state.monuments,
+// });
+// const mapDispatchToProps = (dispatch) => ({
+//     setCity: (city) => dispatch(setCity(city)),
+//     setTheme: (theme) => dispatch(setTheme(theme)),
+// });
 
 const styles = StyleSheet.create({
     th_container: {
@@ -77,4 +73,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Choice);
+export default Choice;

@@ -20,6 +20,8 @@ import { Provider, connect } from "react-redux";
 import { createStore } from "redux";
 import rootReducer from "./_reducers";
 import StackNavigator from "./_screens/StackNavigator";
+require("firebase/functions");
+
 
 const store = createStore(rootReducer);
 

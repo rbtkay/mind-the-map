@@ -18,3 +18,8 @@ export const themes = [
         imageUrl: require("../assets/monuments.jpg"),
     },
 ]
+
+export const thumbnails = {
+    "Beirut": require("../assets/lebanon.png"),
+    "Paris": require("../assets/eiffel-tower.png")
+}
