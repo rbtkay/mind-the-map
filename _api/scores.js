@@ -1,7 +1,6 @@
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { firebase } from "./config/firebaseConfig";
 
-import { getUserByEmail } from "../_api/user";
 
 const scoresRef = firebase.firestore().collection("scores");
 
@@ -22,31 +21,31 @@ exports.getScores = () => {
     });
 };
 
-exports.getScoresOrderByScore = async () => {
-    return new Promise((resolve, reject) => {
-        scoresRef
-            .orderBy("score", "desc")
-            .limit(10)
-            .get()
-            .then(async (querySnapshot) => {
-                let query_result = [];
-                querySnapshot.forEach(async (doc) => {
-                    const { email } = doc.data();
-                    query_result.push({...doc.data()})
-                });
+// exports.getScoresOrderByScore = async () => {
+//     return new Promise((resolve, reject) => {
+//         scoresRef
+//             .orderBy("score", "desc")
+//             .limit(10)
+//             .get()
+//             .then(async (querySnapshot) => {
+//                 let query_result = [];
+//                 querySnapshot.forEach(async (doc) => {
+//                     const { email } = doc.data();
+//                     query_result.push({...doc.data()})
+//                 });
 
-                const scores = []
-                for (const s of query_result) {
-                    const {user} = await getUserByEmail(s.email);
-                    scores.push({...s, username: user.given_name})
-                }
-                resolve(scores);
-            })
-            .catch((err) => {
-                reject(err);
-            });
-    });
-};
+//                 const scores = []
+//                 for (const s of query_result) {
+//                     const {user} = await getUserByEmail(s.email);
+//                     scores.push({...s, username: user.given_name})
+//                 }
+//                 resolve(scores);
+//             })
+//             .catch((err) => {
+//                 reject(err);
+//             });
+//     });
+// };
 // exports.getScoresByUserOrderByScore = (username) => {
 //     return new Promise((resolve, reject) => {
 //         scoresRef

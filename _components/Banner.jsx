@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux';
 
 const Banner = () => {
 	const user = useSelector(state => state.user);
-	console.log('the banner', user);
 
 	return (
 		<View style={styles.banner}>
@@ -30,7 +29,7 @@ const Banner = () => {
 						justifyContent: 'center',
 					}}
 				>
-					<Text style={{ color: 'white' }}>{user.username}</Text>
+					<Text style={{ color: 'white' }}>{user.given_name}</Text>
 				</View>
 			</View>
 			<View

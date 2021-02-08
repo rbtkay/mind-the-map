@@ -70,22 +70,18 @@ exports.getMonuments = (filter_ids = null, city = null) => {
 };
 
 exports.getPoisCountByCityAndTheme = (city, theme) => {
-    console.log("gettign count", theme);
-    console.log("getting count", city)
     return new Promise((resolve, reject) => {
         poisRef
             .where("city", "==", city)
             .where("theme", "==", theme)
             .get()
             .then((querySnapshot) => {
-                console.log(querySnapshot.size)
                 resolve(querySnapshot.size);
             });
     });
 };
 
 exports.getSomePois = (ids) => {
-    console.log("CALLING")
     return new Promise((resolve, reject) => {
         const pois = [];
         poisRef

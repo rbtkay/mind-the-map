@@ -1,60 +1,40 @@
-import { List, ListItem, Text, Thumbnail, View } from 'native-base';
-import { StyleSheet } from 'react-native';
+import { Icon, List, ListItem, Thumbnail, View } from 'native-base';
+import { StyleSheet, TouchableOpacity, Linking, Text } from 'react-native';
 import React from 'react';
-import { APP_COLOR } from '../assets/constant_styles';
 import styles from '../_css/styles';
-const CustomList = ({ title, pois }) => {
-	console.log(pois);
-	return (
-		<View
-			style={{
-				backgroundColor: 'white',
-				borderRadius: 20,
-				flex: 1,
-				margin: 20,
-				shadowColor: '#000',
-				shadowOffset: {
-					width: 0,
-					height: 8,
-				},
-				shadowOpacity: 0.44,
-				shadowRadius: 10.32,
+import PoisItemList from './PoisItemList';
+import ChallengeItemList from './ChallengeItemList';
 
-				elevation: 16,
-			}}
-		>
+const CustomList = ({ title, items, no_item_message, list_type = 'challenges' }) => {
+	return (
+		<View style={styles.elevatedContainer}>
 			<View style={styles.titleContainer}>
 				<Text style={styles.title}>{title}</Text>
 			</View>
-			{pois
-				&& pois.map((poi, index) => (
-					<List>
+			<List>
+				{items && items.length > 0 ? (
+					items.map((item, index) => (
 						<ListItem
+							key={index}
 							style={{
 								flex: 1,
 								flexDirection: 'row',
 								justifyContent: 'space-between',
 							}}
 						>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'flex-start',
-								}}
-							>
-								<Thumbnail
-									source={require('../assets/map_example.png')}
-								/>
-								<View style={{ marginLeft: 12 }}>
-									<Text style={{ fontSize: 30 }}>Simon</Text>
-									<Text style={{ fontSize: 15 }}>Paris</Text>
-								</View>
-							</View>
-							<Text>Your turn</Text>
+							{list_type == 'pois' ? (
+								<PoisItemList poi={item} key={index} />
+							) : (
+								<ChallengeItemList challenge={item} key={index} />
+							)}
 						</ListItem>
-					</List>
-				))}
+					))
+				) : (
+					<ListItem>
+						<Text>{no_item_message}</Text>
+					</ListItem>
+				)}
+			</List>
 		</View>
 	);
 };

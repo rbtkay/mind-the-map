@@ -10,8 +10,10 @@ const BASE_URL = 'https://us-central1-mind-the-map.cloudfunctions.net/';
 
 const useFetch = () => {
 	const [result, setResult] = useState(null);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const load = async ({ url, method = POST, body = '' }) => {
+		setIsLoading(true);
 		const params = {
 			method,
 			headers: {
@@ -21,11 +23,11 @@ const useFetch = () => {
 		};
 		const response = await fetch(BASE_URL + url, params);
 		const data = await response.json();
-
 		setResult(data);
+		setIsLoading(false);
 	};
 
-	return [result, load];
+	return [result, load, isLoading];
 };
 
 export default useFetch;

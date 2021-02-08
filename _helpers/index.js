@@ -2,13 +2,6 @@ exports.calculatePoints = (distance, timeTaken) => {
 	const limit_m = 2000;
 	const remainingTime = 10000 - timeTaken;
 	const distanceInFormula = limit_m - distance > 0 ? limit_m - distance : 0;
-
-	console.log('information');
-	console.log(typeof remainingTime);
-	console.log(remainingTime);
-	console.log(typeof distanceInFormula);
-	console.log(distanceInFormula);
-
 	const finalScore = Number(remainingTime * ((distanceInFormula * 5) / 2000)).toFixed(
 		3
 	);

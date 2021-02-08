@@ -1,9 +1,9 @@
 // modules
 import { combineReducers } from "redux";
 // reducers
-import timer from "./TimerReducer";
-import game from "./GameReducer";
-import user from "./UserReducer";
+import timer from "./timer";
+import game from "./game";
+import user from "./user";
 
 export default combineReducers({
     timer,

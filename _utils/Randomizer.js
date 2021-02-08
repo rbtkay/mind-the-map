@@ -28,12 +28,6 @@ exports.getRandomQuestions = (city, theme) => {
             getSomePois(chosen_ids).then((result) => {
                 resolve(result);
             });
-            // getMonuments(chosen_ids, "Paris").then((pois) => {
-            // console.log(monuments);
-            // setMonuments(monuments);
-            // navigation.replace("GameScreen");
-            // resolve(pois);
-            // });
         });
     });
 };

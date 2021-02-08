@@ -1,4 +1,4 @@
-import { GOOGLE_CLIENT_ID } from './config/env';
+import { GOOGLE_CLIENT_ID, GOOLE_CLIENT_ID_STANDALONE } from './config/env';
 import * as Google from 'expo-google-app-auth';
 import { firebase } from '../_api/config/firebaseConfig';
 
@@ -9,14 +9,14 @@ const userRef = firebase.firestore().collection('users');
 // TODO: enable signout.
 
 exports.signInWithGoogleAsync = async () => {
+	console.log('SIGNINXXX');
 	try {
 		const result = await Google.logInAsync({
 			androidClientId: GOOGLE_CLIENT_ID,
+			androidStandaloneAppClientId: GOOLE_CLIENT_ID_STANDALONE,
 			scopes: ['profile', 'email'],
 		});
-		console.log('after google login async');
-		console.log(result);
-
+		console.log('result', result);
 		if (result.type === 'success') {
 			const userInfo = await onSignIn(result);
 			return { token: result.accessToken, userInfo };
@@ -28,7 +28,7 @@ exports.signInWithGoogleAsync = async () => {
 	}
 };
 
-exports.getUserByEmail = email => {
+export const getUserByEmail = email => {
 	return new Promise((resolve, reject) => {
 		const user = [];
 		userRef
@@ -38,12 +38,21 @@ exports.getUserByEmail = email => {
 				querySnapshot.forEach(doc => {
 					user.push(doc.data());
 				});
-				resolve({ user: user[0] });
+				resolve(user[0]);
 			})
 			.catch(error => {
 				console.log(error);
 				reject(error);
 			});
+	});
+};
+
+exports.updateUserCity = (email, type = 'practice', city) => {
+	return new Promise((resolve, reject) => {
+		userRef
+			.doc(email)
+			.update({ [type == 'practice' ? 'practice_city' : 'challenge_city']: city })
+			.then(_ => resolve("user's city updated"));
 	});
 };
 
@@ -58,7 +67,6 @@ exports.googleLogout = () => {
 
 const onSignIn = googleUser => {
 	return new Promise((resolve, reject) => {
-		let userInfo;
 		// We need to register an Observer on Firebase Auth to make sure auth is initialized.
 		var unsubscribe = firebase
 			.auth()
@@ -95,7 +103,8 @@ const onSignIn = googleUser => {
 									name,
 									picture,
 									email,
-									city: DEFAULT_CITY,
+									practice_city: DEFAULT_CITY,
+									challenge_city: DEFAULT_CITY,
 									heighest_score: 0,
 								};
 								await userRef.doc(email).set(new_user);
@@ -126,8 +135,6 @@ const onSignIn = googleUser => {
 };
 
 const isUserEqual = (googleUser, firebaseUser) => {
-	console.log('googleUser', googleUser);
-	console.log('firebaseUser', firebaseUser);
 	if (firebaseUser) {
 		var providerData = firebaseUser.providerData;
 		for (var i = 0; i < providerData.length; i++) {

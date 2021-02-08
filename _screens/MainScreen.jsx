@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { View, Dimensions, StyleSheet, Image, ImageBackground } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+	View,
+	Dimensions,
+	StyleSheet,
+	Image,
+	ImageBackground,
+	Modal,
+} from 'react-native';
 import {
 	Container,
 	Header,
@@ -14,192 +21,272 @@ import {
 	Right,
 	Left,
 	Icon,
+	H1,
 } from 'native-base';
 import { AsyncStorage, LogBox, TouchableOpacity } from 'react-native';
 import { connect, useDispatch, useSelector } from 'react-redux';
-import { APP_COLOR } from '../assets/constant_styles';
-import { useNavigation } from '@react-navigation/native';
+import { getActionFromState, useNavigation } from '@react-navigation/native';
 import useFetch from '../_utils/functions/hooks/useFetch';
-import { googleLogout } from '../_api/user';
 import CustomList from '../_components/CustomList';
+import { useIsFocused } from '@react-navigation/native';
 
 //styles
-import customStyle from '../_css/styles';
-import Banner from '../_components/Banner';
-import { thumbnails } from '../_utils/constants';
-import { setPois } from '../_actions/game';
+import customStyle, { COLORS } from '../_css/styles';
+import { CHALLENGES_STATUS } from '../_utils/constants';
+import { setCity, setGameType, setPois } from '../_reducers/game';
+import { GAME_TYPES } from '../_reducers/game';
+
+import { getUserChallenges } from '../_api/challenges';
+import { clearUser } from '../_reducers/user';
+import CustomModal from '../_components/CustomModal';
+import ChooseCityModal from '../_components/Modals/ChooseCityModal';
 
 const MainScreen = () => {
-	const [result, load] = useFetch();
-	// const [storage, getItem] = useStorage();
 	LogBox.ignoreLogs(['Failed prop type', 'Setting a timer']);
+	const waiting_challenge_interval = useRef();
+
+	const [on_going_challenges, setOnGoingChallenges] = useState([]);
+	const [completed_challenges, setCompletedChallenges] = useState([]);
+	const [waiting_challenges, setWaitingChallenges] = useState([]);
+
+	const [practice_btn, setPracticeBtn] = useState('Practice Round');
+	const [challenge_btn, setChallengeBtn] = useState('Challenge random opponent');
+	// modal
+	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [chosen_edit, setChosenEdit] = useState();
+
 	const navigation = useNavigation();
+	const [result, load, isLoading] = useFetch();
+
+	const isFocused = useIsFocused();
 
 	const user = useSelector(state => state.user);
 	const dispatch = useDispatch();
 
 	useEffect(() => {
-		console.log('result');
+		if (!isFocused) {
+			clearTimeout(waiting_challenge_interval.current);
+			return;
+		}
+
+		getChallenges();
+
+		if (waiting_challenges.length > 0) {
+			setChallengeBtn("Waiting for opponent...");
+			waiting_challenge_interval.current = setInterval(() => {
+				console.log('calling');
+				getChallenges();
+			}, 5000);
+		}
+	}, [isFocused]);
+
+	useEffect(() => {
+		if (waiting_challenges.length <= 0) {
+			console.log('clearing interval');
+			setChallengeBtn("Challenge random opponent")
+			clearInterval(waiting_challenge_interval.current);
+		} else if (!waiting_challenge_interval.current) {
+			setChallengeBtn("Waiting for opponent...");
+			waiting_challenge_interval.current = setInterval(() => {
+				console.log('calling');
+				getChallenges();
+			}, 5000);
+		}
+	}, [waiting_challenges]);
+
+	useEffect(() => {
 		if (!result) return;
-		dispatch(setPois(result.result.pois));
-		// dispatch(prepareTimer());
-		navigation.navigate("GameScreen");
-		//TODO: listen to the result and redirect to GameScreen
+
+		console.log("result", result)
+
+		if (result.pois) {
+			// when the pois are returned
+			dispatch(setPois(result.pois));
+			setPracticeBtn("Practice round");
+			navigation.navigate('GameScreen');
+		} else if (result.new_challenge_id) {
+			// when the new challenge is created
+			console.log('the new challenge id - ', result.new_challenge_id);
+			getChallenges();
+		}
 	}, [result]);
 
-	const logout = () => {
-		googleLogout();
-		AsyncStorage.clear(() => {
-			setUser({ email: null, username: null, random_ref: null });
-			console.log('destroying user');
+	const getChallenges = () => {
+		getUserChallenges(user.email).then(result => {
+			setOnGoingChallenges(
+				result.filter(challenge => challenge.status == CHALLENGES_STATUS.ONGOING)
+			);
+			setCompletedChallenges(
+				result.filter(
+					challenge => challenge.status == CHALLENGES_STATUS.COMPLETED
+				)
+			);
+			setWaitingChallenges(
+				result.filter(challenge => challenge.status == CHALLENGES_STATUS.WAITING)
+			);
 		});
 	};
 
 	const challengeSomeone = async () => {
-		console.log('clicked');
-		const postData = { email: 'robert.g.khayat@gmail.com', city: 'Paris' };
-		// load({ url: 'randomChallenges', body: postData });
+		if (isLoading) return;
+		if (waiting_challenges.length > 0) return;
 
-		console.log('storage', storage);
+		setChallengeBtn("Waiting for opponent...");
+
+		waiting_challenge_interval.current = setInterval(() => getChallenges(), 5000);
+
+		load({
+			url: 'randomChallenges',
+			body: {
+				email: user.email,
+				display_name: user.given_name,
+				city: user.challenge_city,
+			},
+		});
 	};
 
 	const startGame = () => {
-		console.log('starting game');
-		console.log(user);
-		load({ url: 'pois', body: { city: user.default_city } });
+		if (isLoading) return;
+		setPracticeBtn('Preparing pois...');
+		dispatch(setGameType(GAME_TYPES.SINGLE_PLAYER));
+		dispatch(setCity(user.practice_city));
+		load({ url: 'pois', body: { city: user.practice_city } });
 	};
 
 	const inviteFriend = () => {
+		//TODO: implement the invite system
 		console.lgg('inviting friend . . .');
 	};
 
 	return (
-		<Container>
-			<Content style={{ backgroundColor: 'orchid' }}>
-				<View
-					style={{
-						flex: 1,
-						flexDirection: 'row',
-						justifyContent: 'space-between',
-						padding: 24,
-					}}
-				>
-					<TouchableOpacity
+		<Container style={{ backgroundColor: COLORS.background }}>
+			<ImageBackground
+				source={require('../assets/image_yan/final-imgs/map-bg2.png')}
+				style={{ flex: 1, resizeMode: 'cover', justifyContent: 'center' }}
+			>
+				<Content>
+					<ChooseCityModal
+						isVisible={isModalVisible}
+						chosen_edit={chosen_edit}
+						closeModal={() => setIsModalVisible(false)}
+					/>
+					<View
 						style={{
 							flex: 1,
 							flexDirection: 'row',
+							justifyContent: 'space-between',
+							padding: 24,
 						}}
-						onPress={() => navigation.navigate('CityScreen')}
 					>
-						<Thumbnail
-							source={thumbnails[user.default_city]}
-							style={{ tintColor: 'white' }}
-							square
+						<TouchableOpacity onPress={() => navigation.navigate("ProfileScreen")}>
+							<Image
+								style={{ width: 80, height: 80 }}
+								source={require('../assets/image_yan/final-imgs/profile.png')}
+							/>
+						</TouchableOpacity>
+						<Image
+							style={{ width: 150, height: 80, resizeMode: 'contain' }}
+							source={require('../assets/image_yan/final-imgs/logo2.png')}
 						/>
-						<Text
-							style={{
-								flex: 1,
-								justifyContent: 'center',
-								marginLeft: 20,
-								paddingVertical: 20,
-								color: 'white',
-							}}
-						>
-							{user.default_city}
+						<TouchableOpacity>
+							<Image
+								style={{ width: 80, height: 80 }}
+								source={require('../assets/image_yan/final-imgs/settings.png')}
+							/>
+						</TouchableOpacity>
+					</View>
+
+					<Button
+						style={[
+							customStyle.mainBtn,
+							{
+								backgroundColor: COLORS.red_buttons,
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								paddingRight: 10,
+							},
+						]}
+						onPress={challengeSomeone}
+					>
+						<Text style={{ fontSize: 20, color: 'white' }}>
+							{challenge_btn}
+						</Text>
+						<Image
+							style={customStyle.tinyImg}
+							source={require('../assets/image_yan/final-imgs/arrow-white.png')}
+						/>
+					</Button>
+					<TouchableOpacity
+						style={{
+							backgroundColor: COLORS.white_containers,
+							flexDirection: 'row',
+						}}
+						onPress={() => {
+							setChosenEdit('Challenge');
+							setIsModalVisible(true);
+						}}
+					>
+						<Image
+							style={[customStyle.tinyImg, { margin: 5 }]}
+							source={require('../assets/image_yan/final-imgs/edit-red.png')}
+						/>
+						<Text style={{ color: COLORS.background, margin: 5 }}>
+							{user.challenge_city}
+						</Text>
+					</TouchableOpacity>
+					<Button
+						style={[
+							customStyle.mainBtn,
+							{
+								backgroundColor: COLORS.green_buttons,
+								marginTop: 20,
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								paddingRight: 10,
+							},
+						]}
+						onPress={startGame}
+					>
+						<Text style={{ fontSize: 20, color: 'white' }}>
+							{practice_btn}
+						</Text>
+						<Image
+							style={customStyle.tinyImg}
+							source={require('../assets/image_yan/final-imgs/arrow-white.png')}
+						/>
+					</Button>
+					<TouchableOpacity
+						style={{
+							backgroundColor: COLORS.white_containers,
+							flexDirection: 'row',
+						}}
+						onPress={() => {
+							setChosenEdit('Practice');
+							setIsModalVisible(true);
+						}}
+					>
+						<Image
+							style={[customStyle.tinyImg, { margin: 5 }]}
+							source={require('../assets/image_yan/final-imgs/edit-green.png')}
+						/>
+						<Text style={{ color: COLORS.background, margin: 5 }}>
+							{user.practice_city}
 						</Text>
 					</TouchableOpacity>
 
-					<Button style={customStyle.headerBtn} onPress={() => navigation.navigate("ScoreScreen")}>
-						<Thumbnail source={require('../assets/setting.png')} small />
-					</Button>
-				</View>
-				<Banner />
-
-				<View style={customStyle.container}>
-					<Button style={customStyle.mainBtn} onPress={challengeSomeone}>
-						<Text style={{ fontSize: 50, color: APP_COLOR }}>
-							Challenge Opponent
-						</Text>
-					</Button>
-				</View>
-				<View style={customStyle.container}>
-					<Button style={customStyle.mainBtn} onPress={startGame}>
-						<Text style={{ fontSize: 50, color: APP_COLOR }}>
-							Single Player
-						</Text>
-					</Button>
-				</View>
-				{/* <View style={customStyle.container}>
-					<Button style={customStyle.mainBtn} onPress={inviteFriend}>
-						<Text style={{ fontSize: 50, color: APP_COLOR }}>
-							Invite a Friend
-						</Text>
-					</Button>
-				</View> */}
-				<CustomList title={'Ongoing Games'} />
-				<CustomList title={'Completed Games'} />
-			</Content>
+					<CustomList
+						title={'Ongoing Games'}
+						no_item_message={'No ongoing games'}
+						items={on_going_challenges}
+					/>
+					<CustomList
+						title={'Completed Games'}
+						no_item_message={'No completed games'}
+						items={completed_challenges}
+					/>
+				</Content>
+			</ImageBackground>
 		</Container>
 	);
 };
-
-const styles = StyleSheet.create({
-	menu: {
-		flex: 3,
-		justifyContent: 'space-evenly',
-	},
-	menuBtn: {
-		width: 300,
-		height: 60,
-		justifyContent: 'center',
-		alignItems: 'center',
-		margin: 50,
-		backgroundColor: APP_COLOR,
-	},
-	title: { textAlign: 'center', flex: 2 },
-	menuTxt: {
-		fontSize: 40,
-	},
-	image_background: {
-		flex: 1,
-		resizeMode: 'contain',
-		justifyContent: 'center',
-	},
-	bodyContent: {
-		flex: 1,
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignContent: 'center',
-	},
-	profile_pic: {
-		width: 50,
-		height: 50,
-	},
-	challenge_opponent_btn: {
-		height: 80,
-		alignContent: 'center',
-		justifyContent: 'center',
-		marginTop: 20,
-		marginLeft: 20,
-		marginRight: 20,
-		borderRadius: 20,
-	},
-	game_btn: {
-		margin: 20,
-		width: 100,
-		height: 80,
-		justifyContent: 'center',
-		borderRadius: 10,
-		backgroundColor: '#4F5D2F',
-	},
-	align_center: { flex: 1, flexDirection: 'row', justifyContent: 'center' },
-
-	container_game_btn: {
-		flex: 1,
-		flexDirection: 'row',
-		justifyContent: 'center',
-		marginTop: 20,
-	},
-});
-
 export default MainScreen;

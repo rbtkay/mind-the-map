@@ -1,5 +1,7 @@
 export const QUESTION_MARK_ICON = require('../assets/question-mark-circle-icon.png')
 
+export const CHALLENGES_STATUS = {WAITING: "WAITING", ONGOING: "ONGOING", COMPLETED: "COMPLETED"}
+
 export const cities = [
     //TODO: change this to city and adapt the page
     {

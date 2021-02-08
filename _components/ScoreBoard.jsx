@@ -1,20 +1,20 @@
 import { Container, View, Button, Icon, Thumbnail } from 'native-base';
 import { Image, Text } from 'react-native';
-import styles from '../_css/styles';
+import styles, { COLORS } from '../_css/styles';
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 
-const ScoreBoard = () => {
-	const game = useSelector(state => state.game);
+const ScoreBoard = ({ score }) => {
+	const navigation = useNavigation();
 
-	console.log(game);
 	return (
 		<View
 			style={{
 				backgroundColor: 'white',
 				borderRadius: 20,
 				flex: 1,
-				margin: 20,
+				margin: 10,
+				marginBottom: 30,
 				padding: 20,
 				paddingTop: 0,
 				shadowColor: '#000',
@@ -31,7 +31,7 @@ const ScoreBoard = () => {
 			<Text style={styles.title}>Bravo !</Text>
 			<View
 				style={{
-					flex: 3,
+					flex: 1,
 					flexDirection: 'row',
 					justifyContent: 'space-around',
 				}}
@@ -45,36 +45,45 @@ const ScoreBoard = () => {
 				>
 					<Image
 						source={require('../assets/Paris.jpeg')}
-						style={{ height: '100%', width: 100 }}
+						style={{ height: 125, width: 125 }}
 					/>
-				</View>
-				<View style={{ flex: 2 }}>
 					<View style={{ padding: 30 }}>
-						<Text style={{ fontSize: 30, textAlign: 'center' }}>
-							{game.total_score}
+						<Text style={{ fontFamily: 'Roboto_medium', fontSize:25, color: COLORS.Darker_font_color, textAlign: 'center' }}>
+							{score}
 							{'\n'} points
 						</Text>
 					</View>
-					<View
+				</View>
+			</View>
+			<View
+				style={{
+					flexDirection: 'row',
+					justifyContent: 'center',
+					alignItems: 'center',
+				}}
+			>
+				<Button
+					style={[
+						styles.coolBtn,
+						{
+							backgroundColor: COLORS.green_buttons,
+							top: 50,
+							justifyContent: 'center',
+							width: '70%',
+						},
+					]}
+					onPress={() => navigation.navigate('MainScreen')}
+				>
+					<Text
 						style={{
-							flex: 1,
-							flexDirection: 'row',
-							justifyContent: 'space-around',
+							color: COLORS.white_containers,
+							fontFamily: 'Roboto_medium',
+							fontSize: 20,
 						}}
 					>
-						<Button style={styles.smallBtn}>
-							<Thumbnail
-								source={require('../assets/replay.png')}
-								style={{ tintColor: 'blue' }}
-								small
-								square
-							/>
-						</Button>
-						<Button style={styles.smallBtn}>
-							<Text style={{ color: 'blue' }}>Next</Text>
-						</Button>
-					</View>
-				</View>
+						Back to Homepage
+					</Text>
+				</Button>
 			</View>
 		</View>
 	);

@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, Dimensions, StyleSheet, Image, Linking } from 'react-native';
+import {
+	View,
+	Dimensions,
+	StyleSheet,
+	Image,
+	Linking,
+	ImageBackground,
+} from 'react-native';
 import { Container, Header, Button, Body, Title, Text } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import { AsyncStorage, LogBox } from 'react-native';
-import { APP_COLOR } from '../assets/constant_styles';
 import { connect, useDispatch } from 'react-redux';
 import { signInWithGoogleAsync } from '../_api/user';
 import { googleLogout } from '../_api/user';
-import { setUser } from '../_actions/user';
+import { setUser } from '../_reducers/user';
+import customStyles, { COLORS } from '../_css/styles';
 
 const LoginScreen = () => {
 	LogBox.ignoreLogs(['Failed prop type', 'Setting a timer']);
@@ -23,16 +30,21 @@ const LoginScreen = () => {
 		try {
 			const result = await signInWithGoogleAsync();
 			const {
-				userInfo: { email, city, given_name, heighest_score, picture },
+				userInfo: {
+					email,
+					practice_city,
+					challenge_city,
+					given_name,
+					heighest_score,
+					picture,
+				},
 			} = result;
-			// console.log("login successfull");
+			console.log('login successfull');
 			AsyncStorage.multiSet(
 				[
 					['user_email', email],
-					['default_city', city],
 					['username', given_name],
 					['heighest_score', heighest_score.toString()],
-					['picture_url', picture],
 				],
 				error => {
 					console.log(error);
@@ -43,7 +55,8 @@ const LoginScreen = () => {
 				setUser({
 					email,
 					given_name,
-					default_city: city,
+					practice_city,
+					challenge_city,
 					username: given_name,
 					heighest_score,
 				})
@@ -54,45 +67,70 @@ const LoginScreen = () => {
 	};
 
 	return (
-		<Container style={{ backgroundColor: APP_COLOR }}>
-			<Header
-				androidStatusBarColor={APP_COLOR}
-				style={{ backgroundColor: APP_COLOR }}
-				iosBarStyle={APP_COLOR}
+		<Container style={{ backgroundColor: COLORS.background }}>
+			<ImageBackground
+				source={require('../assets/image_yan/final-imgs/map-bg2.png')}
+				style={{ flex: 1, resizeMode: 'cover', justifyContent: 'center' }}
 			>
-				<Body style={styles.bodyContent}>
-					<Title style={{ fontSize: 60 }}>Mind the map</Title>
-				</Body>
-			</Header>
-			<View style={{ flex: 6 }}>
-				<View style={styles.image}>
-					<Image
-						source={require('../assets/map_example.png')}
-						resizeMode="contain"
+				<View style={{ flex: 8 }}>
+					<View style={styles.image}>
+						<Image
+							source={require('../assets/image_yan/final-imgs/logo2.png')}
+							resizeMode="contain"
+							style={{
+								width: '100%',
+								height: '100%', //Dimensions.get("window").height / 3,
+							}}
+						/>
+					</View>
+					<View
 						style={{
-							width: '100%',
-							height: '100%', //Dimensions.get("window").height / 3,
-						}}
-					/>
-				</View>
-				<View style={styles.loginBtn}>
-					<Button
-						style={{
-							height: '40%',
-							width: '80%',
+							flex: 2,
+							flexDirection: 'row',
 							justifyContent: 'center',
 						}}
-						transparent
-						onPress={() => onLoginPress()}
 					>
-						<Text style={{ fontSize: 40, color: 'white' }}>
-							Login using Google
+						<Text
+							style={{
+								fontStyle: 'italic',
+								fontSize: 25,
+								margin: 75,
+								marginTop: 20,
+								color: COLORS.white_containers,
+							}}
+						>
+							Can you locate places on an unlabeled map ?
 						</Text>
-					</Button>
+					</View>
+					<View style={styles.loginBtn}>
+						<Button
+							style={{
+								backgroundColor: COLORS.green_buttons,
+								borderRadius: 20,
+								height: 80,
+								width: '80%',
+								justifyContent: 'center',
+							}}
+							onPress={() => onLoginPress()}
+						>
+							<Text style={{ fontSize: 20, color: 'white' }}>
+								Continue using Google
+							</Text>
+						</Button>
+					</View>
+					<View
+						style={{
+							flex: 1,
+							justifyContent: 'flex-end',
+							alignItems: 'center',
+						}}
+					>
+						<Text style={{ color: COLORS.white_containers }}>
+							&copy; mindthemap 2021
+						</Text>
+					</View>
 				</View>
-
-				<View></View>
-			</View>
+			</ImageBackground>
 		</Container>
 	);
 };

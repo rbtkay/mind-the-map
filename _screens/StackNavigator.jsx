@@ -8,10 +8,12 @@ import CityScreen from './CityScreen';
 import LoginScreen from './LoginScreen';
 import ThemeScreen from './ThemeScreen';
 import MainScreen from './MainScreen';
+import RoundScreen from './RoundScreen';
 import CreateGameScreen from './CreateGameScreen';
-import { connect, useDispatch, useSelector } from 'react-redux';
-import { firebase } from '../_api/config/firebaseConfig';
-import { setUser } from '../_actions/user';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUserByEmail } from '../_api/user';
+import { setUser } from '../_reducers/user';
+import ProfileScreen from './ProfileScreen';
 
 const Stack = createStackNavigator();
 
@@ -32,13 +34,7 @@ const Router = () => {
 	const [isLogin, setIsLogin] = useState(user.email != null);
 
 	useEffect(() => {
-		console.log('changing user', user);
-		// (async () => {
-		// console.log("in the router!!");
-		// console.log(user);
-		// if the user is set in redux consider the user logged in
 		setIsLogin(user.email != null);
-		// })();
 	}, [user]);
 
 	useEffect(() => {
@@ -46,20 +42,16 @@ const Router = () => {
 			// the persistent signin is done by leaving the user info in the asyncstorage
 			const local_user = await AsyncStorage.multiGet([
 				'user_email',
-				'default_city',
 				'username',
 				'heighest_score',
 				'picture_url',
 			]);
 
-			dispatch(
-				setUser({
-					email: local_user[0][1],
-					username: local_user[2][1],
-					default_city: local_user[1][1],
-					heighest_score: local_user[3][1],
-				})
-			);
+			const user_info = await getUserByEmail(local_user[0][1]);
+
+			console.log('user_info', user_info);
+
+			dispatch(setUser(user_info));
 		})();
 	}, []);
 
@@ -69,15 +61,6 @@ const Router = () => {
 				<>
 					{isLogin ? (
 						<>
-							<Stack.Screen
-								name="ScoreScreen"
-								options={{
-									headerShown: false,
-								}}
-								e
-							>
-								{props => <ScoreScreen {...props} />}
-							</Stack.Screen>
 							<Stack.Screen
 								name="MainScreen"
 								options={{
@@ -95,22 +78,6 @@ const Router = () => {
 								{props => <CreateGameScreen {...props} />}
 							</Stack.Screen>
 							<Stack.Screen
-								name="CityScreen"
-								options={{
-									headerShown: false,
-								}}
-							>
-								{props => <CityScreen {...props} />}
-							</Stack.Screen>
-							<Stack.Screen
-								name="ThemeScreen"
-								options={{
-									headerShown: false,
-								}}
-							>
-								{props => <ThemeScreen {...props} />}
-							</Stack.Screen>
-							<Stack.Screen
 								name="GameScreen"
 								options={{
 									headerShown: false,
@@ -118,7 +85,15 @@ const Router = () => {
 							>
 								{props => <GameScreen {...props} />}
 							</Stack.Screen>
-							{/* <Stack.Screen
+							<Stack.Screen
+								name="RoundScreen"
+								options={{
+									headerShown: false,
+								}}
+							>
+								{props => <RoundScreen {...props} />}
+							</Stack.Screen>
+							<Stack.Screen
 								name="ScoreScreen"
 								options={{
 									headerShown: false,
@@ -126,7 +101,16 @@ const Router = () => {
 								e
 							>
 								{props => <ScoreScreen {...props} />}
-							</Stack.Screen> */}
+							</Stack.Screen>
+							<Stack.Screen
+								name="ProfileScreen"
+								options={{
+									headerShown: false,
+								}}
+								e
+							>
+								{props => <ProfileScreen {...props} />}
+							</Stack.Screen>
 						</>
 					) : (
 						<Stack.Screen

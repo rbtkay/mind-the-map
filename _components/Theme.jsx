@@ -22,7 +22,7 @@ import {
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
-import { setDefaultCity } from "../_actions/user";
+import { setDefaultCity } from "../_reducers/user";
 
 const Choice = ({ name, image }) => {
     const navigation = useNavigation();

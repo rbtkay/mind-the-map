@@ -1,10 +1,15 @@
 import React, { useState, useEffect, createRef, useCallback } from 'react';
-import { View, Dimensions, LogBox, StyleSheet, Image } from 'react-native';
+import { View, Dimensions, LogBox, StyleSheet, Image, Modal } from 'react-native';
 import { Content, Container, Header, Left, Body, Title, H2 } from 'native-base';
 
 import MapView, { Overlay } from 'react-native-maps';
 import { connect, useDispatch, useSelector } from 'react-redux';
-import { NavigationContext, useNavigation } from '@react-navigation/native';
+import {
+	CurrentRenderContext,
+	NavigationContext,
+	useIsFocused,
+	useNavigation,
+} from '@react-navigation/native';
 import {
 	calculatePoints,
 	getDistanceFromLatLonInKm,
@@ -15,15 +20,28 @@ import Score from '../_components/Score';
 import AudioButton from '../_components/AudioButton';
 import { APP_COLOR } from '../assets/constant_styles';
 
-import { setRoundScore, setScore } from '../_actions/game';
-import { calculateTotalScore } from '../_actions/game';
-import { TIMER_STATUS } from '../_actions/Timer';
+import { setTotalScore } from '../_reducers/game';
+import { TIMER_STATUS } from '../_reducers/timer';
 
-const INITIAL_REGION = {
-	latitude: 48.8555, // south / north
-	longitude: 2.34, // west / east
-	latitudeDelta: 0.1,
-	longitudeDelta: 0.16, // zoom in / out
+import { setTimerValue, startTimer, stopAndRestartTimer } from '../_reducers/timer';
+import { GAME_TYPES } from '../_reducers/game';
+import { COLORS } from '../_css/styles';
+import ScoreModal from '../_components/Modals/ScoreModal';
+import { setChallengeRoundScore } from '../_api/challenges';
+
+const REGIONS = {
+	Paris: {
+		latitude: 48.8555, // south / north
+		longitude: 2.34, // west / east
+		latitudeDelta: 0.1,
+		longitudeDelta: 0.16, // zoom in / out
+	},
+	Beirut: {
+		latitude: 33.8938,
+		longitude: 35.5018,
+		latitudeDelta: 0.1,
+		longitudeDelta: 0.16, // zoom in / out
+	},
 };
 
 const customMapStyle = [
@@ -80,6 +98,7 @@ const GameScreen = () => {
 	const [correctMarkerArray, setCorrectMarkerArray] = useState([]);
 	const [numberOfAttempts, setNumberOfAttemps] = useState(0);
 	const [isPlaying, setIsPlaying] = useState(true);
+	const [isLost, setIsLost] = useState(false);
 
 	const [scores, setScores] = useState([]);
 	const [distance, setDistance] = useState(null);
@@ -88,16 +107,20 @@ const GameScreen = () => {
 	const dispatch = useDispatch();
 	const game = useSelector(state => state.game);
 	const timer = useSelector(state => state.timer);
+	const user = useSelector(state => state.user);
 
 	const navigation = useNavigation();
 
-	const { pois } = game;
+	const isFocused = useIsFocused();
+
+	const { pois, game_type } = game;
 
 	const mapRef = createRef();
 
 	useEffect(() => {
-		console.log(correctMarkerArray);
-	}, [correctMarkerArray]);
+		if (isFocused) dispatch(startTimer());
+		else dispatch(stopAndRestartTimer());
+	}, [isFocused]);
 
 	useEffect(() => {
 		if (!pois) return;
@@ -109,52 +132,23 @@ const GameScreen = () => {
 		if (timer.status == TIMER_STATUS.ready) dispatch(startTimer());
 	}, [pois]);
 
-	// useEffect(() => {
-	// 	console.log('changing time is done', is_time_done);
-	// 	if (!is_time_done) return;
-	// 	stopTurn();
-	// }, [is_time_done]);
-
+	// the selection of a marker make the correct marker appear and start the endgame process
 	useEffect(() => {
 		if (!marker) return;
+
 		dispatch(stopAndRestartTimer());
 		setCorrectMarker(correctMarkerArray[numberOfAttempts]);
-		// console.log(game);
-		// dispatch(setTimerState)
-		// setIsPlaying(false);
-		// stopTurn();
-		// console.log("timer",timer)
-		// endTurn();
 	}, [marker]);
 
+	// we need to wait for the time to endTurn
 	useEffect(() => {
-		if (!correctMarker) return;
-		// endTurn();
-		console.log('the timer', timer);
-	}, [correctMarker]);
-
-	useEffect(() => {
-		console.log('timer value', timer);
 		if (timer.value > 0) {
-			endTurn();
+			endTurn(timer.value);
 		}
 	}, [timer.value]);
 
-	const stopTurn = () => {
-		// the game should be stop when player set a marker or when the time is up
-		setCorrectMarker(correctMarkerArray[numberOfAttempts]);
-
-		setIsPlaying(false);
-		// dispatch(stopAndRestartTimer());
-		// toggleTimer(); // stop timer
-		mapRef.current.animateToRegion(INITIAL_REGION);
-	};
-
-	const endTurn = useCallback(() => {
-		console.log('ending turn...');
-		if (marker) {
-			console.log('timer', timer);
-
+	const endTurn = () => {
+		if (marker && timer.value < 100) {
 			// get the time it took for the user to set a marker
 			const round_time = getTimeTakenFromAnimation(timer.value, 10000);
 
@@ -165,103 +159,97 @@ const GameScreen = () => {
 				correctMarker.latitude,
 				correctMarker.longitude
 			);
-
-			console.log('round_time', round_time);
-			console.log('round_distance', round_distance_in_m);
-
 			const res = calculatePoints(round_distance_in_m, round_time);
 
-			console.log('result', res);
 			setScores([...scores, res]);
 			setDistance(round_time);
 			setTime(round_distance_in_m);
-			// setS({...s, [numberOfAttempts]: res});
-			// dispatch(
-			// 	setScore(timer.value, {
-			// 		lat1: marker.latitude,
-			// 		long1: marker.longitude,
-			// 		lat2: correctMarker.latitude,
-			// 		long2: correctMarker.longitude,
-			// 	})
-			// );
 		} else {
-			dispatch(setScore(100, null, false));
+			// this case happens when the timer gets to zero before the player's move
+			setScores([...scores, 0]);
+			setDistance(null);
+			setTime(null);
+			setCorrectMarker(correctMarkerArray[numberOfAttempts]);
+			setIsLost(true);
+			setIsPlaying(false);
 		}
-	}, [timer.value]);
+	};
 
 	useEffect(() => {
-		console.log('score', scores);
-		console.log('time', time);
-		console.log('distance', distance);
 		if (time && distance && scores.length > 0) setIsPlaying(false);
 	}, [time, distance, scores]);
 
-	// useEffect(() => {
-	// 	console.log('score', scores);
-	// }, [scores]);
-
-	// useEffect(() => {
-	// 	console.log('numberOfAttempts', numberOfAttempts);
-	// 	console.log('score');
-	// 	// console.log(currentScore);
-	// }, [currentScore]);
-
-	// useEffect(() => {
-	// 	if (value == 0) return;
-
-	// 	setScore(value, {
-	// 		lat1: marker.latitude,
-	// 		long1: marker.longitude,
-	// 		lat2: correctMarker.latitude,
-	// 		long2: correctMarker.longitude,
-	// 	});
-	// 	resetTimer();
-	// }, [value]);
-
-	// useEffect(() => {
-	// 	// setIsPlaying(false);
-	// }, [score]);
-
-	const nextPoi = () => {
-		dispatch(startTimer());
+	const nextPoi = async () => {
+		// if all questions are done
 		if (numberOfAttempts >= correctMarkerArray.length - 1) {
-			// dispatch(calculateTotalScore());
-			console.log('scores', scores);
-			const round_score = scores.reduce((sum, score) => sum + parseFloat(score));
-			dispatch(setRoundScore(round_score));
-			// 	calculateTotalScore();
-			navigation.replace('ScoreScreen');
+			let screen_to_navigate;
+			const current_score = scores.reduce(
+				(sum, score) => parseFloat(sum) + parseFloat(score)
+			);
+
+			dispatch(setTotalScore(current_score));
+
+			if (game_type == GAME_TYPES.SINGLE_PLAYER) {
+				screen_to_navigate = 'ScoreScreen';
+			} else if (game_type == GAME_TYPES.MULTI_PLAYER) {
+				screen_to_navigate = 'RoundScreen';
+				await setChallengeRoundScore(game.challenge_id, current_score, user.email);
+			}
+
+			resetValues();
+			navigation.navigate(screen_to_navigate);
 		} else {
+			dispatch(startTimer());
+
 			setNumberOfAttemps(numberOfAttempts + 1);
 			setMarker(null);
 			setCorrectMarker(null);
 			setIsPlaying(true);
+			setIsLost(false);
 		}
+	};
+
+	const resetValues = () => {
+		setNumberOfAttemps(0);
+		setMarker(null);
+		setCorrectMarker(null);
+		setIsPlaying(true);
+		setIsLost(false);
+		dispatch(setTimerValue(0));
 	};
 
 	return (
 		<Container>
-			<Header
-				androidStatusBarColor={APP_COLOR}
-				style={{ backgroundColor: APP_COLOR }}
-				iosBarStyle={APP_COLOR}
+			<ScoreModal
+				isVisible={!isPlaying}
+				closeModal={() => nextPoi()}
+				score={scores[numberOfAttempts]}
+				distance={distance}
+				time={time}
+				total_score={scores.reduce((agg, score) => agg + parseFloat(score), 0)}
+			/>
+			<View
+				style={{
+					flexDirection: 'row',
+					justifyContent: 'space-between',
+					padding: 24,
+					backgroundColor: COLORS.background,
+				}}
 			>
-				<Body style={{ alignItems: 'center' }}>
-					{correctMarkerArray.length > 0 && (
-						<Title style={{ fontSize: 40 }}>
-							{correctMarkerArray[numberOfAttempts].name}
-						</Title>
-					)}
-				</Body>
+				{correctMarkerArray.length > 0 && (
+					<Title>{correctMarkerArray[numberOfAttempts].name}</Title>
+				)}
 				<Left style={{ alignItems: 'flex-end' }}>
 					<AudioButton />
 				</Left>
-			</Header>
+			</View>
 			<Content>
 				<View style={styles.container}>
 					<MapView
 						style={styles.mapStyle}
-						initialRegion={INITIAL_REGION}
+						initialRegion={
+							REGIONS[game.city]
+						}
 						onPress={e => setMarker(e.nativeEvent.coordinate)}
 						ref={mapRef}
 						customMapStyle={customMapStyle}
@@ -280,33 +268,33 @@ const GameScreen = () => {
 						)}
 					</MapView>
 					<Overlay style={styles.overlay} image={null}>
-						{isPlaying ? (
-							<Timer />
-						) : (
-							<View style={styles.score_view}>
-								{!isPlaying ? (
-									<Score
-										score={scores[numberOfAttempts]}
-										distance={distance}
-										time={time}
-									/>
-								) : (
-									<View style={styles.lost_text}>
-										<H2 style={{ color: 'white' }}>You Got Lost!</H2>
-									</View>
-								)}
-								<View style={{ flex: 2 }}>
-									<View style={styles.next_btn}>
-										<TouchableOpacity onPress={nextPoi}>
-											<Image
-												source={next_icon}
-												style={styles.next_icon}
-											/>
-										</TouchableOpacity>
-									</View>
-								</View>
-							</View>
-						)}
+						{
+							isPlaying && <Timer endTurn={endTurn} />
+							// ) : (
+							// <View style={styles.score_view}>
+							// 	{!isLost && scores ? (
+							// 		<Score
+							// 			score={scores[numberOfAttempts]}
+							// 			distance={distance}
+							// 			time={time}
+							// 		/>
+							// 	) : (
+							// 		<View style={styles.lost_text}>
+							// 			<H2 style={{ color: 'white' }}>You Got Lost!</H2>
+							// 		</View>
+							// 	)}
+							// 	<View style={{ flex: 2 }}>
+							// 		<View style={styles.next_btn}>
+							// 			<TouchableOpacity onPress={nextPoi}>
+							// 				<Image
+							// 					source={next_icon}
+							// 					style={styles.next_icon}
+							// 				/>
+							// 			</TouchableOpacity>
+							// 		</View>
+							// 	</View>
+							// </View>
+						}
 					</Overlay>
 				</View>
 			</Content>
@@ -314,26 +302,6 @@ const GameScreen = () => {
 	);
 };
 
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import {
-	setTimerValue,
-	startTimer,
-	stopAndRestartTimer,
-} from '../_reducers/TimerReducer';
-
-// const mapStateToProps = state => ({
-// 	value: state.timer.value,
-// 	timer: state.timer,
-// 	score: state.game.score,
-// 	is_time_done: state.game.is_time_done,
-// });
-// const mapDispatchToProps = dispatch => ({
-// 	toggleTimer: isRunning => dispatch(toggleTimer(isRunning)),
-// 	resetTimer: () => dispatch(resetTimer()),
-// 	setTimerValue: value => dispatch(setTimerValue(value)),
-// 	setScore: (animated_value, coordinates) => dispatch(setScore(animated_value, coordinates)),
-// 	startTimer: () => dispatch(startTimer()),
-// });
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
@@ -350,8 +318,8 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 		alignContent: 'center',
-		position: 'absolute',
-		bottom: 0,
+		bottom: 20,
+		padding: 20,
 		width: Dimensions.get('window').width,
 	},
 	next_btn: {
@@ -363,8 +331,16 @@ const styles = StyleSheet.create({
 	score_view: {
 		flex: 1,
 		flexDirection: 'row',
-		backgroundColor: APP_COLOR,
+		backgroundColor: COLORS.white_containers,
+		borderRadius: 20,
 		paddingRight: 10,
+		shadowColor: '#000',
+		shadowOffset: {
+			width: 0,
+			height: 8,
+		},
+		shadowOpacity: 0.44,
+		shadowRadius: 10.32,
 	},
 	next_icon: {
 		width: 100,
