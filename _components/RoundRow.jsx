@@ -30,7 +30,7 @@ const RoundRow = ({ round, user_score, opponent_score }) => {
 					}}
 				>
 					{user_score != undefined
-						? parseFloat(user_score).toFixed(2)
+						? parseFloat(user_score).toFixed(0)
 						: 'no score'}
 				</Text>
 				<Text
@@ -41,9 +41,9 @@ const RoundRow = ({ round, user_score, opponent_score }) => {
 				>
 					{user_score != undefined
 						? opponent_score
-							? parseFloat(opponent_score).toFixed(2)
-							: 'waiting'
-						: 'no score'}
+							? parseFloat(opponent_score).toFixed(0)
+							: 'hidden'
+						: 'hidden'}
 				</Text>
 			</View>
 		</View>

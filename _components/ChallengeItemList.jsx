@@ -4,7 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { Image, TouchableOpacity } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import styles, { COLORS } from '../_css/styles';
-import { GAME_TYPES, setChallengeId, setCity, setGameType, setPois } from '../_reducers/game';
+import {
+	GAME_TYPES,
+	setChallengeId,
+	setCity,
+	setGameType,
+	setPois,
+} from '../_reducers/game';
 import { setChallengeCity } from '../_reducers/user';
 import { CHALLENGES_STATUS } from '../_utils/constants';
 const ChallengeItemList = ({ challenge }) => {
@@ -119,11 +125,26 @@ const ChallengeItemList = ({ challenge }) => {
 						/>
 					</View>
 				) : (
-					<Text
-						style={{ fontFamily: 'Roboto_medium', color: COLORS.red_buttons }}
+					<View
+						style={{
+							flexDirection: 'row',
+							justifyContent: 'space-around',
+							alignItems: 'center',
+						}}
 					>
-						Their{'\n'}Turn
-					</Text>
+						<Text
+							style={{
+								fontFamily: 'Roboto_medium',
+								color: COLORS.red_buttons,
+							}}
+						>
+							Their{'\n'}Turn
+						</Text>
+						<Image
+							style={styles.tinyImg}
+							source={require('../assets/image_yan/final-imgs/arrow-red.png')}
+						/>
+					</View>
 				)}
 			</View>
 		</TouchableOpacity>

@@ -19,8 +19,6 @@ const RoundScreen = () => {
 	const game = useSelector(state => state.game);
 	const user = useSelector(state => state.user);
 
-	const [isReady, setIsReady] = useState(false);
-	const [isDone, setIsDone] = useState(false);
 	const [challenge, setChallenge] = useState(null);
 	const [user_scores, setUserScores] = useState([]);
 
@@ -41,29 +39,11 @@ const RoundScreen = () => {
 
 		getChallengeById(challenge_id).then(challenge => {
 			setChallenge(challenge);
-
-			if (challenge.rounds_scores.length % 2 == 0) {
-				setIsReady(true);
-				clearInterval(challenge_interval.current);
-				dispatch(
-					setPois(
-						challenge.pois.filter(
-							poi => poi.round == challenge.rounds_scores.length / 2
-						)
-					)
-				);
-			} else {
-				setIsReady(false);
-				console.log('setting interval');
-				challenge_interval.current = setInterval(
-					() => getChallenge(challenge_id),
-					10000
-				);
-			}
 		});
 	}, [isFocused]);
 
 	useEffect(() => {
+		console.log('challenge', challenge);
 		if (!challenge) return;
 
 		const user_scores = challenge.rounds_scores
@@ -84,42 +64,16 @@ const RoundScreen = () => {
 			opponent_scores.reduce((agg, score) => agg + parseFloat(score), 0)
 		);
 
-		if (challenge.rounds_scores.length == 6) {
-			setIsDone(true);
-			clearInterval(challenge_interval.current);
-		} else if (challenge.rounds_scores.length % 2 == 0) {
-			setIsReady(true);
-			clearInterval(challenge_interval.current);
+		// clearInterval(challenge_interval.current);
+		if (user_scores.length == 3) {
 			dispatch(
-				setPois(
-					challenge.pois.filter(
-						poi => poi.round == challenge.rounds_scores.length / 2
-					)
-				)
+				setPois(challenge.pois.filter(poi => poi.round == user_scores.length))
 			);
-		} else {
-			setIsReady(false);
 		}
 	}, [challenge]);
 
-	const getChallenge = async challenge_id => {
-		getChallengeById(challenge_id).then(challenge => {
-			setChallenge(challenge);
-			setUserScores(
-				challenge.rounds_scores
-					.filter(score => score.user_email == user.email)
-					.map(score => score.score)
-			);
-			setOpponentScores(
-				challenge.rounds_scores
-					.filter(score => score.user_email != user.email)
-					.map(score => score.score)
-			);
-		});
-	};
-
 	const nextRound = () => {
-		if (isDone) {
+		if (user_scores.length == 3 && opponent_scores.length == 3) {
 			//TODO: rematch
 			// load({
 			// 	url: 'challengePlayer',
@@ -131,7 +85,7 @@ const RoundScreen = () => {
 			// 	},
 			// });
 			navigation.navigate('MainScreen');
-		} else if (isReady) navigation.navigate('GameScreen');
+		} else if (user_scores.length < 3) navigation.navigate('GameScreen');
 	};
 
 	if (!challenge) return null;
@@ -159,11 +113,13 @@ const RoundScreen = () => {
 							fontSize: 30,
 						}}
 					>
-						{isDone
+						{user_scores.length == 3 && opponent_scores.length == 3
 							? user_total_score > opponent_total_scores
 								? 'YOU WON'
 								: 'YOU LOST'
-							: `Round ${user_scores.length}/3`}
+							: user_scores.length == 3
+							? `Finished`
+							: `Round ${user_scores.length + 1}/3`}
 					</Text>
 				</View>
 				<Content>
@@ -257,7 +213,8 @@ const RoundScreen = () => {
 										color: COLORS.Darker_font_color,
 									}}
 								>
-									{user_total_score ?? 'no score'}
+									{parseFloat(user_total_score).toFixed(0)
+										?? 'no score'}
 								</Text>
 							</View>
 							<View style={{ margin: 20 }}>
@@ -275,7 +232,10 @@ const RoundScreen = () => {
 										color: COLORS.Darker_font_color,
 									}}
 								>
-									{opponent_total_scores ?? 'wainting'}
+									{opponent_scores.length == 3
+									&& user_scores.length == 3
+										? parseFloat(opponent_total_scores).toFixed(0)
+										: 'hidden'}
 								</Text>
 							</View>
 						</View>
@@ -310,11 +270,11 @@ const RoundScreen = () => {
 								]}
 							>
 								<Text>
-									{isDone
-										? 'Rematch'
-										: isReady
-										? 'Next round'
-										: 'Waiting'}
+									{user_scores.length == 3
+										? opponent_scores.length < 3
+											? 'Waiting'
+											: 'Rematch'
+										: 'Play round'}
 								</Text>
 							</Button>
 						</View>

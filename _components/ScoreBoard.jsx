@@ -49,7 +49,8 @@ const ScoreBoard = ({ score }) => {
 					/>
 					<View style={{ padding: 30 }}>
 						<Text style={{ fontFamily: 'Roboto_medium', fontSize:25, color: COLORS.Darker_font_color, textAlign: 'center' }}>
-							{score}
+							{parseFloat(score).toFixed(0)}
+							{/* //TODO: format to remove digit after comma  */}
 							{'\n'} points
 						</Text>
 					</View>

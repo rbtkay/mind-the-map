@@ -46,8 +46,32 @@ const REGIONS = {
 
 const customMapStyle = [
 	{
+		elementType: 'labels',
+		stylers: [
+			{
+				visibility: 'off',
+			},
+		],
+	},
+	{
 		featureType: 'administrative',
 		elementType: 'geometry',
+		stylers: [
+			{
+				visibility: 'off',
+			},
+		],
+	},
+	{
+		featureType: 'administrative.land_parcel',
+		stylers: [
+			{
+				visibility: 'off',
+			},
+		],
+	},
+	{
+		featureType: 'administrative.neighborhood',
 		stylers: [
 			{
 				visibility: 'off',
@@ -59,14 +83,6 @@ const customMapStyle = [
 		stylers: [
 			{
 				visibility: 'off',
-			},
-		],
-	},
-	{
-		featureType: 'poi.park',
-		stylers: [
-			{
-				visibility: 'on',
 			},
 		],
 	},
@@ -88,6 +104,9 @@ const customMapStyle = [
 		],
 	},
 ];
+
+const user_marker_img = require('../assets/image_yan/final-imgs/pin-red.png');
+const correct_marker_img = require('../assets/image_yan/final-imgs/pin-green.png');
 
 const next_icon = require('../assets/navigation.png');
 const GameScreen = () => {
@@ -136,6 +155,10 @@ const GameScreen = () => {
 	useEffect(() => {
 		if (!marker) return;
 
+		console.log('markers coordinates');
+		console.log(marker);
+		console.log(correctMarkerArray[numberOfAttempts]);
+
 		dispatch(stopAndRestartTimer());
 		setCorrectMarker(correctMarkerArray[numberOfAttempts]);
 	}, [marker]);
@@ -161,9 +184,11 @@ const GameScreen = () => {
 			);
 			const res = calculatePoints(round_distance_in_m, round_time);
 
+			mapRef.current.animateToRegion(REGIONS[game.city]);
+
 			setScores([...scores, res]);
-			setDistance(round_time);
-			setTime(round_distance_in_m);
+			setDistance(round_distance_in_m);
+			setTime(round_time);
 		} else {
 			// this case happens when the timer gets to zero before the player's move
 			setScores([...scores, 0]);
@@ -193,7 +218,11 @@ const GameScreen = () => {
 				screen_to_navigate = 'ScoreScreen';
 			} else if (game_type == GAME_TYPES.MULTI_PLAYER) {
 				screen_to_navigate = 'RoundScreen';
-				await setChallengeRoundScore(game.challenge_id, current_score, user.email);
+				await setChallengeRoundScore(
+					game.challenge_id,
+					current_score,
+					user.email
+				);
 			}
 
 			resetValues();
@@ -220,14 +249,6 @@ const GameScreen = () => {
 
 	return (
 		<Container>
-			<ScoreModal
-				isVisible={!isPlaying}
-				closeModal={() => nextPoi()}
-				score={scores[numberOfAttempts]}
-				distance={distance}
-				time={time}
-				total_score={scores.reduce((agg, score) => agg + parseFloat(score), 0)}
-			/>
 			<View
 				style={{
 					flexDirection: 'row',
@@ -247,15 +268,22 @@ const GameScreen = () => {
 				<View style={styles.container}>
 					<MapView
 						style={styles.mapStyle}
-						initialRegion={
-							REGIONS[game.city]
-						}
-						onPress={e => setMarker(e.nativeEvent.coordinate)}
+						initialRegion={REGIONS[game.city]}
+						onPress={e => {
+							if (isPlaying) setMarker(e.nativeEvent.coordinate);
+						}}
 						ref={mapRef}
 						customMapStyle={customMapStyle}
 					>
 						{marker && (
-							<MapView.Marker coordinate={marker} pinColor={APP_COLOR} />
+							// <MapView.Marker coordinate={marker} image={user_marker_img} />
+							<MapView.Marker coordinate={marker}>
+								<Image
+									source={user_marker_img}
+									style={{ width: 28, height: 32 }}
+									resizeMode="contain"
+								/>
+							</MapView.Marker>
 						)}
 						{correctMarker && (
 							<MapView.Marker
@@ -263,38 +291,29 @@ const GameScreen = () => {
 									latitude: correctMarker.latitude,
 									longitude: correctMarker.longitude,
 								}}
-								pinColor={'green'}
-							/>
+								style={{ height: 100 }}
+							>
+								<Image
+									source={correct_marker_img}
+									style={{ width: 28, height: 32 }}
+									resizeMode="contain"
+								/>
+							</MapView.Marker>
 						)}
 					</MapView>
 					<Overlay style={styles.overlay} image={null}>
-						{
-							isPlaying && <Timer endTurn={endTurn} />
-							// ) : (
-							// <View style={styles.score_view}>
-							// 	{!isLost && scores ? (
-							// 		<Score
-							// 			score={scores[numberOfAttempts]}
-							// 			distance={distance}
-							// 			time={time}
-							// 		/>
-							// 	) : (
-							// 		<View style={styles.lost_text}>
-							// 			<H2 style={{ color: 'white' }}>You Got Lost!</H2>
-							// 		</View>
-							// 	)}
-							// 	<View style={{ flex: 2 }}>
-							// 		<View style={styles.next_btn}>
-							// 			<TouchableOpacity onPress={nextPoi}>
-							// 				<Image
-							// 					source={next_icon}
-							// 					style={styles.next_icon}
-							// 				/>
-							// 			</TouchableOpacity>
-							// 		</View>
-							// 	</View>
-							// </View>
-						}
+						{isPlaying && <Timer endTurn={endTurn} />}
+						<ScoreModal
+							isVisible={!isPlaying}
+							closeModal={() => nextPoi()}
+							score={scores[numberOfAttempts]}
+							distance={distance}
+							time={time}
+							total_score={scores.reduce(
+								(agg, score) => agg + parseFloat(score),
+								0
+							)}
+						/>
 					</Overlay>
 				</View>
 			</Content>
