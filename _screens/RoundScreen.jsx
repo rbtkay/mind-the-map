@@ -5,7 +5,7 @@ import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { setChallengeRoundScore, getChallengeById } from '../_api/challenges';
 import { setChallengeId, setPois } from '../_reducers/game';
 import styles, { COLORS } from '../_css/styles';
-import { clearUser } from '../_reducers/user';
+import { clearUser, setChallengeCity } from '../_reducers/user';
 import RoundRow from '../_components/RoundRow';
 import { ImageBackground } from 'react-native';
 import useFetch from '../_utils/functions/hooks/useFetch';
@@ -38,39 +38,65 @@ const RoundScreen = () => {
 		}
 
 		getChallengeById(challenge_id).then(challenge => {
-			setChallenge(challenge);
+			console.log('challenge is Focused');
+			const user_scores = challenge.rounds_scores
+				.filter(score => score.user_email == user.email)
+				.map(score => score.score);
+
+			const opponent_scores = challenge.rounds_scores
+				.filter(score => score.user_email != user.email)
+				.map(score => score.score);
+
+			setUserScores(user_scores);
+			setOpponentScores(opponent_scores);
+
+			setUserTotalScores(
+				user_scores.reduce((agg, score) => agg + parseFloat(score), 0)
+			);
+			setOpponentTotalScores(
+				opponent_scores.reduce((agg, score) => agg + parseFloat(score), 0)
+			);
+
+			// clearInterval(challenge_interval.current);
+			setChallenge(challenge)
+			if (user_scores.length < 3) {
+				dispatch(
+					setPois(challenge.pois.filter(poi => poi.round == user_scores.length))
+				);
+			}
 		});
 	}, [isFocused]);
 
-	useEffect(() => {
-		console.log('challenge', challenge);
-		if (!challenge) return;
+	// useEffect(() => {
+	// 	console.log('challenge for the useEffect');
 
-		const user_scores = challenge.rounds_scores
-			.filter(score => score.user_email == user.email)
-			.map(score => score.score);
+	// 	if (!challenge) return;
 
-		const opponent_scores = challenge.rounds_scores
-			.filter(score => score.user_email != user.email)
-			.map(score => score.score);
+	// 	const user_scores = challenge.rounds_scores
+	// 		.filter(score => score.user_email == user.email)
+	// 		.map(score => score.score);
 
-		setUserScores(user_scores);
-		setOpponentScores(opponent_scores);
+	// 	const opponent_scores = challenge.rounds_scores
+	// 		.filter(score => score.user_email != user.email)
+	// 		.map(score => score.score);
 
-		setUserTotalScores(
-			user_scores.reduce((agg, score) => agg + parseFloat(score), 0)
-		);
-		setOpponentTotalScores(
-			opponent_scores.reduce((agg, score) => agg + parseFloat(score), 0)
-		);
+	// 	setUserScores(user_scores);
+	// 	setOpponentScores(opponent_scores);
 
-		// clearInterval(challenge_interval.current);
-		if (user_scores.length == 3) {
-			dispatch(
-				setPois(challenge.pois.filter(poi => poi.round == user_scores.length))
-			);
-		}
-	}, [challenge]);
+	// 	setUserTotalScores(
+	// 		user_scores.reduce((agg, score) => agg + parseFloat(score), 0)
+	// 	);
+	// 	setOpponentTotalScores(
+	// 		opponent_scores.reduce((agg, score) => agg + parseFloat(score), 0)
+	// 	);
+
+	// 	// clearInterval(challenge_interval.current);
+	// 	if (user_scores.length < 3) {
+	// 		dispatch(
+	// 			setPois(challenge.pois.filter(poi => poi.round == user_scores.length))
+	// 		);
+	// 	}
+	// }, [challenge]);
 
 	const nextRound = () => {
 		if (user_scores.length == 3 && opponent_scores.length == 3) {

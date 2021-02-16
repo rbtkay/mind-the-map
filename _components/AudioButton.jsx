@@ -5,8 +5,8 @@ import { BackgroundSound, STATUS } from '../_helpers/singleton';
 import { Image, TouchableOpacity } from 'react-native';
 import styles from '../_css/styles';
 
-const sound_on = require('../assets/image_yan/final-imgs/sound-on.png');
-const sound_off = require('../assets/image_yan/final-imgs/sound-off.png');
+const sound_on = require('../assets/sound_enabled.png');
+const sound_off = require('../assets/sound_disabled.png');
 
 const AudioButton = () => {
 	const sound_icon_status =
@@ -33,7 +33,7 @@ const AudioButton = () => {
 		<TouchableOpacity onPress={toggleSound}>
 			<Image
 				source={soundIcon == 'sound' ? sound_on : sound_off}
-				style={styles.tinyImg}
+				style={[{ tintColor: 'white' }, styles.tinyImg]}
 			/>
 		</TouchableOpacity>
 	);

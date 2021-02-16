@@ -25,7 +25,6 @@ const timer = (state = { value: 0, status: TIMER_STATUS.ready }, action) => {
 		case TIMER_ACTIONS.STOP_RESTART_TIMER:
 			return { value: 0, status: TIMER_STATUS.stopped };
 		case TIMER_ACTIONS.SET_VALUE:
-            console.log("setting the value", action)
 			return { ...state, value: action.value };
 		default:
 			return state;

@@ -215,18 +215,18 @@ const GameScreen = () => {
 			dispatch(setTotalScore(current_score));
 
 			if (game_type == GAME_TYPES.SINGLE_PLAYER) {
-				screen_to_navigate = 'ScoreScreen';
+				navigation.navigate('ScoreScreen');
 			} else if (game_type == GAME_TYPES.MULTI_PLAYER) {
-				screen_to_navigate = 'RoundScreen';
-				await setChallengeRoundScore(
+				const response = await setChallengeRoundScore(
 					game.challenge_id,
 					current_score,
 					user.email
 				);
+				if (response) navigation.navigate('RoundScreen');
+				else console.error("couldn't connect to database");
 			}
-
 			resetValues();
-			navigation.navigate(screen_to_navigate);
+
 		} else {
 			dispatch(startTimer());
 
@@ -291,7 +291,6 @@ const GameScreen = () => {
 									latitude: correctMarker.latitude,
 									longitude: correctMarker.longitude,
 								}}
-								style={{ height: 100 }}
 							>
 								<Image
 									source={correct_marker_img}
@@ -301,7 +300,10 @@ const GameScreen = () => {
 							</MapView.Marker>
 						)}
 					</MapView>
-					<Overlay style={styles.overlay} image={null}>
+					<Overlay
+						style={isPlaying ? styles.overlay_time : styles.overlay_score}
+						image={null}
+					>
 						{isPlaying && <Timer endTurn={endTurn} />}
 						<ScoreModal
 							isVisible={!isPlaying}
@@ -326,19 +328,22 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#fff',
 		alignItems: 'center',
-		justifyContent: 'center',
+		justifyContent: 'flex-start',
 	},
 	mapStyle: {
 		width: Dimensions.get('window').width,
 		height: Dimensions.get('window').height,
 	},
-	overlay: {
+	overlay_score: {
 		flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 		alignContent: 'center',
 		bottom: 20,
 		padding: 20,
+		width: Dimensions.get('window').width,
+	},
+	overlay_time: {
 		width: Dimensions.get('window').width,
 	},
 	next_btn: {

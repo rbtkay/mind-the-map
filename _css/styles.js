@@ -82,7 +82,12 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 	},
 
-	title: { fontFamily: 'Roboto_medium', fontSize: 20, color: COLORS.background, margin: 10 },
+	title: {
+		fontFamily: 'Roboto_medium',
+		fontSize: 20,
+		color: COLORS.background,
+		margin: 10,
+	},
 
 	titleContainer: {
 		borderTopLeftRadius: 20,
@@ -116,8 +121,8 @@ const styles = StyleSheet.create({
 
 	mediumImg: {
 		width: 40,
-		height: 40
-	}
+		height: 40,
+	},
 });
 
 export default styles;

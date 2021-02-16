@@ -17,16 +17,29 @@ const ChallengeItemList = ({ challenge }) => {
 	const navigation = useNavigation();
 	const dispatch = useDispatch();
 
-	const [isReady, setIsReady] = useState(false);
+	const [btn_txt, setBtnTxt] = useState('');
 
 	const user = useSelector(state => state.user);
 
 	useEffect(() => {
-		setIsReady(
-			challenge.rounds_scores.filter(score => score.user_email == user.email).length
-				<= challenge.rounds_scores.filter(score => score.user_email != user.email)
-					.length
-		);
+		if (challenge.status == CHALLENGES_STATUS.COMPLETED) {
+			setBtnTxt('');
+			return;
+		}
+
+		const user_scores_count = challenge.rounds_scores.filter(
+			score => score.user_email == user.email
+		).length;
+		if (user_scores_count == 0) setBtnTxt('New\nGame');
+		else
+			setBtnTxt(
+				user_scores_count
+					<= challenge.rounds_scores.filter(
+						score => score.user_email != user.email
+					).length
+					? 'Your\nTurn'
+					: 'Their\nTurn'
+			);
 	}, [challenge]);
 
 	const joinChallenge = () => {
@@ -103,29 +116,29 @@ const ChallengeItemList = ({ challenge }) => {
 				)}
 			</View>
 			<View style={{ flex: 1 }}>
-				{challenge.status == CHALLENGES_STATUS.COMPLETED ? null : isReady ? (
-					<View
+				{/* {challenge.status == CHALLENGES_STATUS.COMPLETED ? null : isReady ? ( */}
+				<View
+					style={{
+						flexDirection: 'row',
+						justifyContent: 'space-around',
+						alignItems: 'center',
+					}}
+				>
+					<Text
 						style={{
-							flexDirection: 'row',
-							justifyContent: 'space-around',
-							alignItems: 'center',
+							fontFamily: 'Roboto_medium',
+							color: COLORS.red_buttons,
 						}}
 					>
-						<Text
-							style={{
-								fontFamily: 'Roboto_medium',
-								color: COLORS.red_buttons,
-							}}
-						>
-							Your{'\n'}Turn!
-						</Text>
-						<Image
-							style={styles.tinyImg}
-							source={require('../assets/image_yan/final-imgs/arrow-red.png')}
-						/>
-					</View>
-				) : (
-					<View
+						{btn_txt}
+					</Text>
+					<Image
+						style={styles.tinyImg}
+						source={require('../assets/image_yan/final-imgs/arrow-red.png')}
+					/>
+				</View>
+				{/* ) : ( */}
+				{/* <View
 						style={{
 							flexDirection: 'row',
 							justifyContent: 'space-around',
@@ -144,8 +157,8 @@ const ChallengeItemList = ({ challenge }) => {
 							style={styles.tinyImg}
 							source={require('../assets/image_yan/final-imgs/arrow-red.png')}
 						/>
-					</View>
-				)}
+					</View> */}
+				{/* )} */}
 			</View>
 		</TouchableOpacity>
 	);
