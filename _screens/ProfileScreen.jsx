@@ -10,15 +10,8 @@ import { updateUsername } from '../_api/user';
 const ProfileScreen = () => {
 	const navigation = useNavigation();
 	const dispatch = useDispatch();
-
 	const user = useSelector(state => state.user);
-
 	const [username, setUsername] = useState(null);
-	console.log(user);
-
-	useEffect(() => {
-		console.log('username', username);
-	}, [username]);
 
 	const logout = () => {
 		googleLogout();

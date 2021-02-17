@@ -87,7 +87,6 @@ const game = (
 			return { ...state, game_type };
 		case GAME_ACTIONS.SET_CHALLENGE_ID:
 			const { challenge_id } = action;
-			console.log(action)
 			return { ...state, challenge_id };
 		default:
 			return state;

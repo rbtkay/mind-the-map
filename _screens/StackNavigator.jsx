@@ -49,8 +49,6 @@ const Router = () => {
 
 			const user_info = await getUserByEmail(local_user[0][1]);
 
-			console.log('user_info', user_info);
-
 			dispatch(setUser(user_info));
 		})();
 	}, []);
