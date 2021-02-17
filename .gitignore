@@ -19,3 +19,6 @@ web-build/
 #app configuration -- this should be ommited if the repo is private
 app.json
 expo-build-info
+
+#apk
+*.apk

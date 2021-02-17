@@ -40,7 +40,7 @@ const RoundRow = ({ round, user_score, opponent_score }) => {
 					}}
 				>
 					{user_score != undefined
-						? opponent_score
+						? opponent_score != undefined
 							? parseFloat(opponent_score).toFixed(0)
 							: 'hidden'
 						: 'hidden'}

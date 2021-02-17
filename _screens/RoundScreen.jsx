@@ -58,7 +58,7 @@ const RoundScreen = () => {
 			);
 
 			// clearInterval(challenge_interval.current);
-			setChallenge(challenge)
+			setChallenge(challenge);
 			if (user_scores.length < 3) {
 				dispatch(
 					setPois(challenge.pois.filter(poi => poi.round == user_scores.length))
@@ -143,7 +143,7 @@ const RoundScreen = () => {
 							? user_total_score > opponent_total_scores
 								? 'YOU WON'
 								: 'YOU LOST'
-							: user_scores.length == 3
+							: user_scores.length >= 3
 							? `Finished`
 							: `Round ${user_scores.length + 1}/3`}
 					</Text>
@@ -284,25 +284,28 @@ const RoundScreen = () => {
 							>
 								<Text>Home</Text>
 							</Button>
-							<Button
-								onPress={nextRound}
-								style={[
-									styles.coolBtn,
-									{
-										backgroundColor: COLORS.red_buttons,
-										alignItems: 'center',
-										justifyContent: 'center',
-									},
-								]}
-							>
-								<Text>
-									{user_scores.length == 3
-										? opponent_scores.length < 3
-											? 'Waiting'
-											: 'Rematch'
-										: 'Play round'}
-								</Text>
-							</Button>
+							{user_scores.length == 3
+							&& opponent_scores.length == 3 ? null : (
+								<Button
+									onPress={nextRound}
+									style={[
+										styles.coolBtn,
+										{
+											backgroundColor: COLORS.red_buttons,
+											alignItems: 'center',
+											justifyContent: 'center',
+										},
+									]}
+								>
+									<Text>
+										{user_scores.length == 3
+											? opponent_scores.length < 3
+												? 'Waiting'
+												: 'Rematch'
+											: 'Play round'}
+									</Text>
+								</Button>
+							)}
 						</View>
 					</View>
 				</Content>

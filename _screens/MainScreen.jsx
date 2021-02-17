@@ -1,31 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-	View,
-	Dimensions,
-	StyleSheet,
-	Image,
-	ImageBackground,
-	Modal,
-} from 'react-native';
-import {
-	Container,
-	Header,
-	Button,
-	Body,
-	Title,
-	Text,
-	Content,
-	List,
-	ListItem,
-	Thumbnail,
-	Right,
-	Left,
-	Icon,
-	H1,
-} from 'native-base';
-import { AsyncStorage, LogBox, TouchableOpacity } from 'react-native';
-import { connect, useDispatch, useSelector } from 'react-redux';
-import { getActionFromState, useNavigation } from '@react-navigation/native';
+import { View, Image, ImageBackground } from 'react-native';
+import { Container, Button, Text, Content } from 'native-base';
+import { LogBox, TouchableOpacity } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigation } from '@react-navigation/native';
 import useFetch from '../_utils/functions/hooks/useFetch';
 import CustomList from '../_components/CustomList';
 import { useIsFocused } from '@react-navigation/native';
@@ -37,8 +15,6 @@ import { setCity, setGameType, setPois } from '../_reducers/game';
 import { GAME_TYPES } from '../_reducers/game';
 
 import { getUserChallenges } from '../_api/challenges';
-import { clearUser } from '../_reducers/user';
-import CustomModal from '../_components/CustomModal';
 import ChooseCityModal from '../_components/Modals/ChooseCityModal';
 
 const MainScreen = () => {
@@ -51,6 +27,7 @@ const MainScreen = () => {
 
 	const [practice_btn, setPracticeBtn] = useState('Practice Round');
 	const [challenge_btn, setChallengeBtn] = useState('Challenge random opponent');
+	
 	// modal
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const [chosen_edit, setChosenEdit] = useState();
@@ -72,7 +49,7 @@ const MainScreen = () => {
 		getChallenges();
 
 		if (waiting_challenges.length > 0) {
-			setChallengeBtn("Waiting for opponent...");
+			setChallengeBtn('Waiting for opponent...');
 			waiting_challenge_interval.current = setInterval(() => {
 				console.log('calling');
 				getChallenges();
@@ -83,10 +60,10 @@ const MainScreen = () => {
 	useEffect(() => {
 		if (waiting_challenges.length <= 0) {
 			console.log('clearing interval');
-			setChallengeBtn("Challenge random opponent")
+			setChallengeBtn('Challenge random opponent');
 			clearInterval(waiting_challenge_interval.current);
 		} else if (!waiting_challenge_interval.current) {
-			setChallengeBtn("Waiting for opponent...");
+			setChallengeBtn('Waiting for opponent...');
 			waiting_challenge_interval.current = setInterval(() => {
 				console.log('calling');
 				getChallenges();
@@ -97,12 +74,12 @@ const MainScreen = () => {
 	useEffect(() => {
 		if (!result) return;
 
-		console.log("result", result)
+		console.log('result', result);
 
 		if (result.pois) {
 			// when the pois are returned
 			dispatch(setPois(result.pois));
-			setPracticeBtn("Practice round");
+			setPracticeBtn('Practice round');
 			navigation.navigate('GameScreen');
 		} else if (result.new_challenge_id) {
 			// when the new challenge is created
@@ -131,7 +108,7 @@ const MainScreen = () => {
 		if (isLoading) return;
 		if (waiting_challenges.length > 0) return;
 
-		setChallengeBtn("Waiting for opponent...");
+		setChallengeBtn('Waiting for opponent...');
 
 		waiting_challenge_interval.current = setInterval(() => getChallenges(), 5000);
 
@@ -178,7 +155,9 @@ const MainScreen = () => {
 							padding: 24,
 						}}
 					>
-						<TouchableOpacity onPress={() => navigation.navigate("ProfileScreen")}>
+						<TouchableOpacity
+							onPress={() => navigation.navigate('ProfileScreen')}
+						>
 							<Image
 								style={{ width: 80, height: 80 }}
 								source={require('../assets/image_yan/final-imgs/profile.png')}
@@ -200,7 +179,7 @@ const MainScreen = () => {
 						style={[
 							customStyle.mainBtn,
 							{
-								backgroundColor: COLORS.red_buttons,
+								backgroundColor: COLORS.green_buttons,
 								flexDirection: 'row',
 								justifyContent: 'space-between',
 								paddingRight: 10,
@@ -238,7 +217,7 @@ const MainScreen = () => {
 						style={[
 							customStyle.mainBtn,
 							{
-								backgroundColor: COLORS.green_buttons,
+								backgroundColor: COLORS.red_buttons,
 								marginTop: 20,
 								flexDirection: 'row',
 								justifyContent: 'space-between',

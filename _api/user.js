@@ -47,6 +47,15 @@ export const getUserByEmail = email => {
 	});
 };
 
+exports.updateUsername = (username, email) => {
+	return new Promise((resolve, reject) => {
+		userRef
+			.doc(email)
+			.update({ given_name: username })
+			.then(_ => resolve('username updated'));
+	});
+};
+
 exports.updateUserCity = (email, type = 'practice', city) => {
 	return new Promise((resolve, reject) => {
 		userRef

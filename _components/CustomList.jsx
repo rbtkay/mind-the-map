@@ -6,6 +6,7 @@ import PoisItemList from './PoisItemList';
 import ChallengeItemList from './ChallengeItemList';
 
 const CustomList = ({ title, items, no_item_message, list_type = 'challenges' }) => {
+	console.log(items);
 	return (
 		<View style={styles.elevatedContainer}>
 			<View style={styles.titleContainer}>
@@ -31,7 +32,7 @@ const CustomList = ({ title, items, no_item_message, list_type = 'challenges' })
 					))
 				) : (
 					<ListItem>
-						<Text>{no_item_message}</Text>
+						<Text style={{fontFamily: 'Roboto_medium'}}>{no_item_message}</Text>
 					</ListItem>
 				)}
 			</List>

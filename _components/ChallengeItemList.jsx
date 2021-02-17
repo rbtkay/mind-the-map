@@ -16,10 +16,13 @@ import { CHALLENGES_STATUS } from '../_utils/constants';
 const ChallengeItemList = ({ challenge }) => {
 	const navigation = useNavigation();
 	const dispatch = useDispatch();
+	const user = useSelector(state => state.user);
 
 	const [btn_txt, setBtnTxt] = useState('');
 
-	const user = useSelector(state => state.user);
+	const [opponent_name, setOpponentName] = useState(
+		challenge.player_1 == user.email ? challenge.display_name_2 : challenge.display_name_1
+	);
 
 	useEffect(() => {
 		if (challenge.status == CHALLENGES_STATUS.COMPLETED) {
@@ -62,61 +65,37 @@ const ChallengeItemList = ({ challenge }) => {
 			style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}
 		>
 			<View style={{ flex: 3 }}>
-				{challenge.player_1 == user.email ? (
-					<View
+				<View
+					style={{
+						flexDirection: 'row',
+						justifyContent: 'flex-start',
+						alignItems: 'center',
+					}}
+				>
+					<Image
+						style={[styles.mediumImg, { marginRight: 20 }]}
+						source={require('../assets/image_yan/final-imgs/profile.png')}
+					/>
+					<Text
 						style={{
-							flexDirection: 'row',
-							justifyContent: 'flex-start',
-							alignItems: 'center',
+							fontFamily: 'Roboto_medium',
+							color: COLORS.Darker_font_color,
 						}}
 					>
-						<Image
-							style={[styles.mediumImg, { marginRight: 20 }]}
-							source={require('../assets/image_yan/final-imgs/profile.png')}
-						/>
+						{opponent_name}
+						{'\n'}
 						<Text
 							style={{
 								fontFamily: 'Roboto_medium',
-								color: COLORS.Darker_font_color,
+								color: COLORS.Main_font_color,
 							}}
 						>
-							{challenge.display_name_2}
-							{'\n'}
-							<Text
-								style={{
-									fontFamily: 'Roboto_medium',
-									color: COLORS.Main_font_color,
-								}}
-							>
-								{challenge.city}
-							</Text>
+							{challenge.city}
 						</Text>
-					</View>
-				) : (
-					<View
-						style={{
-							flexDirection: 'row',
-							justifyContent: 'flex-start',
-							alignItems: 'center',
-						}}
-					>
-						<Image
-							style={[styles.mediumImg, { marginRight: 20 }]}
-							source={require('../assets/image_yan/final-imgs/profile.png')}
-						/>
-						<Text
-							style={{
-								fontFamily: 'Roboto_medium',
-								color: COLORS.Darker_font_color,
-							}}
-						>
-							{challenge.display_name_1}
-						</Text>
-					</View>
-				)}
+					</Text>
+				</View>
 			</View>
 			<View style={{ flex: 1 }}>
-				{/* {challenge.status == CHALLENGES_STATUS.COMPLETED ? null : isReady ? ( */}
 				<View
 					style={{
 						flexDirection: 'row',
@@ -137,28 +116,6 @@ const ChallengeItemList = ({ challenge }) => {
 						source={require('../assets/image_yan/final-imgs/arrow-red.png')}
 					/>
 				</View>
-				{/* ) : ( */}
-				{/* <View
-						style={{
-							flexDirection: 'row',
-							justifyContent: 'space-around',
-							alignItems: 'center',
-						}}
-					>
-						<Text
-							style={{
-								fontFamily: 'Roboto_medium',
-								color: COLORS.red_buttons,
-							}}
-						>
-							Their{'\n'}Turn
-						</Text>
-						<Image
-							style={styles.tinyImg}
-							source={require('../assets/image_yan/final-imgs/arrow-red.png')}
-						/>
-					</View> */}
-				{/* )} */}
 			</View>
 		</TouchableOpacity>
 	);
