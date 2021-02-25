@@ -15,7 +15,7 @@ export class BackgroundSound {
         if (this.music._loaded) return;
 
         this.music.loadAsync(
-            require("../assets/audio/Carefree_background_music.mp3"),
+            require("../assets/audio/64_Sundays1.mp3"),
             { shouldPlay: true, isLooping: true, volume: 1.0 },
             false
         );

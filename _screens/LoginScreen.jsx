@@ -37,9 +37,9 @@ const LoginScreen = () => {
 					given_name,
 					heighest_score,
 					picture,
+					is_image_public
 				},
 			} = result;
-			console.log('login successfull');
 			AsyncStorage.multiSet(
 				[
 					['user_email', email],
@@ -59,6 +59,8 @@ const LoginScreen = () => {
 					challenge_city,
 					username: given_name,
 					heighest_score,
+					picture,
+					is_image_public
 				})
 			);
 		} catch (error) {

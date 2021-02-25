@@ -1,4 +1,4 @@
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { Text, View } from 'native-base';
 import React, { useEffect, useState } from 'react';
 import { Image, TouchableOpacity } from 'react-native';
@@ -13,18 +13,35 @@ import {
 } from '../_reducers/game';
 import { setChallengeCity } from '../_reducers/user';
 import { CHALLENGES_STATUS } from '../_utils/constants';
+
+import { getUserByEmail } from '../_api/user';
+
+import { DEFAULT_USER_IMAGE } from "../_utils/constants";
+
 const ChallengeItemList = ({ challenge }) => {
 	const navigation = useNavigation();
 	const dispatch = useDispatch();
 	const user = useSelector(state => state.user);
+	const [opponent, setOpponent] = useState(null);
+
+	const isFocused = useIsFocused();
 
 	const [btn_txt, setBtnTxt] = useState('');
 
-	const [opponent_name, setOpponentName] = useState(
-		challenge.player_1 == user.email ? challenge.display_name_2 : challenge.display_name_1
+	const [opponent_email, setOpponentEmail] = useState(
+		challenge.player_1 == user.email ? challenge.player_2 : challenge.player_1
 	);
 
 	useEffect(() => {
+		console.log(opponent);
+	}, [opponent]);
+
+	useEffect(() => {
+		getUserByEmail(opponent_email).then(opp => {
+			console.log('opponent', opp);
+			setOpponent(opp);
+		});
+
 		if (challenge.status == CHALLENGES_STATUS.COMPLETED) {
 			setBtnTxt('');
 			return;
@@ -74,7 +91,12 @@ const ChallengeItemList = ({ challenge }) => {
 				>
 					<Image
 						style={[styles.mediumImg, { marginRight: 20 }]}
-						source={require('../assets/image_yan/final-imgs/profile.png')}
+						borderRadius={20}
+						source={
+							opponent ? opponent.is_image_public
+								? { uri: opponent.picture }
+								: DEFAULT_USER_IMAGE : DEFAULT_USER_IMAGE 
+						}
 					/>
 					<Text
 						style={{
@@ -82,7 +104,7 @@ const ChallengeItemList = ({ challenge }) => {
 							color: COLORS.Darker_font_color,
 						}}
 					>
-						{opponent_name}
+						{opponent ? opponent.given_name : 'Getting challenges...'}
 						{'\n'}
 						<Text
 							style={{

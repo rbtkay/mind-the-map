@@ -15,7 +15,17 @@ import { setCity, setGameType, setPois } from '../_reducers/game';
 import { GAME_TYPES } from '../_reducers/game';
 
 import { getUserChallenges } from '../_api/challenges';
+import { getUserImageByEmail } from '../_api/user';
 import ChooseCityModal from '../_components/Modals/ChooseCityModal';
+import ProfileModal from '../_components/Modals/ProfileModal';
+
+import { AdMobBanner } from 'expo-ads-admob';
+import SettingsModal from '../_components/Modals/SettingsModal';
+
+import { incrementUserPracticeGameStartedCount } from "../_api/user";
+
+const android_dev_banner_id = 'ca-app-pub-3940256099942544/6300978111';
+const android_production_banner_id = 'ca-app-pub-3032945711243815/1902072555';
 
 const MainScreen = () => {
 	LogBox.ignoreLogs(['Failed prop type', 'Setting a timer']);
@@ -27,10 +37,13 @@ const MainScreen = () => {
 
 	const [practice_btn, setPracticeBtn] = useState('Practice Round');
 	const [challenge_btn, setChallengeBtn] = useState('Challenge random opponent');
-	
+
 	// modal
-	const [isModalVisible, setIsModalVisible] = useState(false);
+	const [isModalCityVisible, setIsModalCityVisible] = useState(false);
 	const [chosen_edit, setChosenEdit] = useState();
+
+	const [isModalProfileVisible, setIsModalProfileVisible] = useState(false);
+	const [isModalSettingsVisible, setIsModalSettingsVisible] = useState(false);
 
 	const navigation = useNavigation();
 	const [result, load, isLoading] = useFetch();
@@ -40,7 +53,13 @@ const MainScreen = () => {
 	const user = useSelector(state => state.user);
 	const dispatch = useDispatch();
 
+	// const [bannerAdsId, setBannerAdsId] = useState(
+	// 	__DEV__ ? android_dev_banner_id : android_production_banner_id
+	// );
+	// const android_bannerAdId = useRef('ca-app-pub-3032945711243815/5324466338');
+
 	useEffect(() => {
+		console.log(user);
 		if (!isFocused) {
 			clearTimeout(waiting_challenge_interval.current);
 			return;
@@ -73,8 +92,6 @@ const MainScreen = () => {
 
 	useEffect(() => {
 		if (!result) return;
-
-		console.log('result', result);
 
 		if (result.pois) {
 			// when the pois are returned
@@ -127,6 +144,7 @@ const MainScreen = () => {
 		setPracticeBtn('Preparing pois...');
 		dispatch(setGameType(GAME_TYPES.SINGLE_PLAYER));
 		dispatch(setCity(user.practice_city));
+		// incrementUserPracticeGameStartedCount(user.email);
 		load({ url: 'pois', body: { city: user.practice_city } });
 	};
 
@@ -134,6 +152,8 @@ const MainScreen = () => {
 		//TODO: implement the invite system
 		console.lgg('inviting friend . . .');
 	};
+
+
 
 	return (
 		<Container style={{ backgroundColor: COLORS.background }}>
@@ -143,9 +163,19 @@ const MainScreen = () => {
 			>
 				<Content>
 					<ChooseCityModal
-						isVisible={isModalVisible}
+						isVisible={isModalCityVisible}
 						chosen_edit={chosen_edit}
-						closeModal={() => setIsModalVisible(false)}
+						closeModal={() => setIsModalCityVisible(false)}
+					/>
+
+					<ProfileModal
+						isVisible={isModalProfileVisible}
+						closeModal={() => setIsModalProfileVisible(false)}
+					/>
+
+					<SettingsModal
+						isVisible={isModalSettingsVisible}
+						closeModal={() => setIsModalSettingsVisible(false)}
 					/>
 					<View
 						style={{
@@ -155,21 +185,24 @@ const MainScreen = () => {
 							padding: 24,
 						}}
 					>
-						<TouchableOpacity
-							onPress={() => navigation.navigate('ProfileScreen')}
-						>
+						<TouchableOpacity onPress={() => setIsModalProfileVisible(true)}>
 							<Image
-								style={{ width: 80, height: 80 }}
-								source={require('../assets/image_yan/final-imgs/profile.png')}
+								style={{ width: 70, height: 70 }}
+								source={
+									user.is_image_public
+										? { uri: user.picture }
+										: require('../assets/image_yan/final-imgs/profile.png')
+								}
+								borderRadius={50}
 							/>
 						</TouchableOpacity>
 						<Image
 							style={{ width: 150, height: 80, resizeMode: 'contain' }}
 							source={require('../assets/image_yan/final-imgs/logo2.png')}
 						/>
-						<TouchableOpacity>
+						<TouchableOpacity onPress={() => setIsModalSettingsVisible(true)}>
 							<Image
-								style={{ width: 80, height: 80 }}
+								style={{ width: 70, height: 70 }}
 								source={require('../assets/image_yan/final-imgs/settings.png')}
 							/>
 						</TouchableOpacity>
@@ -202,7 +235,7 @@ const MainScreen = () => {
 						}}
 						onPress={() => {
 							setChosenEdit('Challenge');
-							setIsModalVisible(true);
+							setIsModalCityVisible(true);
 						}}
 					>
 						<Image
@@ -241,7 +274,7 @@ const MainScreen = () => {
 						}}
 						onPress={() => {
 							setChosenEdit('Practice');
-							setIsModalVisible(true);
+							setIsModalCityVisible(true);
 						}}
 					>
 						<Image
@@ -263,6 +296,16 @@ const MainScreen = () => {
 						no_item_message={'No completed games'}
 						items={completed_challenges}
 					/>
+
+					{/* <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+						<AdMobBanner
+							bannerSize="banner"
+							adUnitID={bannerAdsId}
+							servePersonalizedAds={false}
+							onAdViewDidReceiveAd={() => console.log('success')}
+							onDidFailToReceiveAdWithError={e => console.log('err', e)}
+						/>
+					</View> */}
 				</Content>
 			</ImageBackground>
 		</Container>

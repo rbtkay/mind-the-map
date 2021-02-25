@@ -22,3 +22,5 @@ expo-build-info
 
 #apk
 *.apk
+
+*.mp3

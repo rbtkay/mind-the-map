@@ -261,7 +261,7 @@ const RoundScreen = () => {
 									{opponent_scores.length == 3
 									&& user_scores.length == 3
 										? parseFloat(opponent_total_scores).toFixed(0)
-										: 'hidden'}
+										: 'Hidden'}
 								</Text>
 							</View>
 						</View>

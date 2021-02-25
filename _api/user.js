@@ -28,21 +28,13 @@ exports.signInWithGoogleAsync = async () => {
 	}
 };
 
-export const getUserByEmail = email => {
+exports.getUserByEmail = email => {
 	return new Promise((resolve, reject) => {
-		const user = [];
 		userRef
-			.where('email', '==', email)
+			.doc(email)
 			.get()
-			.then(querySnapshot => {
-				querySnapshot.forEach(doc => {
-					user.push(doc.data());
-				});
-				resolve(user[0]);
-			})
-			.catch(error => {
-				console.log(error);
-				reject(error);
+			.then(doc => {
+				resolve(doc.data());
 			});
 	});
 };
@@ -65,6 +57,15 @@ exports.updateUserCity = (email, type = 'practice', city) => {
 	});
 };
 
+exports.updateUserPublicImage = (email, isPublic) => {
+	return new Promise((resolve, reject) => {
+		userRef
+			.doc(email)
+			.update({ is_image_public: isPublic })
+			.then(() => resolve("user's public image updated"));
+	});
+};
+
 exports.googleLogout = () => {
 	firebase
 		.auth()
@@ -72,6 +73,32 @@ exports.googleLogout = () => {
 		.then(() => {
 			console.log('signed out');
 		});
+};
+
+exports.incrementUserPracticeGameStartedCount = email => {
+	return new Promise((resolve, reject) => {
+		userRef
+			.doc(email)
+			.update({
+				practice_game_started_count: firebase.firestore.FieldValue.increment(1),
+			})
+			.then(() => {
+				resolve('practice_game_started_count updated');
+			});
+	});
+};
+
+exports.incrementUserPracticeGameDoneCount = email => {
+	return new Promise((resolve, reject) => {
+		userRef
+			.doc(email)
+			.update({
+				practice_game_done_count: firebase.firestore.FieldValue.increment(1),
+			})
+			.then(() => {
+				resolve('practice_game_done_count updated');
+			});
+	});
 };
 
 const onSignIn = googleUser => {
@@ -115,6 +142,8 @@ const onSignIn = googleUser => {
 									practice_city: DEFAULT_CITY,
 									challenge_city: DEFAULT_CITY,
 									heighest_score: 0,
+									practice_game_started_count: 0,
+									practice_game_done_count: 0,
 								};
 								await userRef.doc(email).set(new_user);
 

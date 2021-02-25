@@ -137,18 +137,21 @@ exports.setChallengeRoundScore = (challenge_id, score, user_email) => {
 			.then(doc => {
 				const { rounds_scores, pois } = doc.data();
 
-				let new_round_score = {score, user_email}
+				let new_round_score = { score, user_email };
 				let new_update = {};
 				if (rounds_scores.length < 5)
 					new_update = { rounds_scores: [...rounds_scores, new_round_score] };
-				else // the sixth score is being inserted
+				// the sixth score is being inserted
+				else
 					new_update = {
 						rounds_scores: [...rounds_scores, new_round_score],
 						status: CHALLENGES_STATUS.COMPLETED,
 					};
 
-				doc.ref.update(new_update);
-				resolve(doc.id);
+				doc.ref.update(new_update).then(results => {
+					console.log("results", results);
+					resolve(doc.id);
+				});
 			})
 			.catch(e => reject(e));
 	});

@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Input, Form, Item } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
-import { googleLogout } from '../_api/user';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearUser, setUser } from '../_reducers/user';
+import { setUser } from '../_reducers/user';
 import { updateUsername } from '../_api/user';
 
 const ProfileScreen = () => {
@@ -13,13 +11,6 @@ const ProfileScreen = () => {
 	const user = useSelector(state => state.user);
 	const [username, setUsername] = useState(null);
 
-	const logout = () => {
-		googleLogout();
-		AsyncStorage.clear(() => {
-			dispatch(clearUser());
-			console.log('destroying user');
-		});
-	};
 
 	return (
 		<View>

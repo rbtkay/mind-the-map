@@ -171,6 +171,8 @@ const GameScreen = () => {
 	}, [timer.value]);
 
 	const endTurn = () => {
+		mapRef.current.animateToRegion(REGIONS[game.city]);
+
 		if (marker && timer.value < 100) {
 			// get the time it took for the user to set a marker
 			const round_time = getTimeTakenFromAnimation(timer.value, 10000);
@@ -183,8 +185,6 @@ const GameScreen = () => {
 				correctMarker.longitude
 			);
 			const res = calculatePoints(round_distance_in_m, round_time);
-
-			mapRef.current.animateToRegion(REGIONS[game.city]);
 
 			setScores([...scores, res]);
 			setDistance(round_distance_in_m);

@@ -47,7 +47,7 @@ const Router = () => {
 				'picture_url',
 			]);
 
-			const user_info = await getUserByEmail(local_user[0][1]);
+			const user_info = local_user[0][1] != undefined ? await getUserByEmail(local_user[0][1]) : null;
 
 			dispatch(setUser(user_info));
 		})();

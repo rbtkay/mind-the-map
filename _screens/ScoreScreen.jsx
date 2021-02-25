@@ -1,19 +1,29 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Container, View, Text, Button, Content } from 'native-base';
 import CustomList from '../_components/CustomList';
 import ScoreBoard from '../_components/ScoreBoard';
-import { useNavigation } from '@react-navigation/native';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { COLORS } from '../_css/styles';
 import { ImageBackground } from 'react-native';
+import { incrementUserPracticeGameDoneCount } from '../_api/user';
 
 const ScoreScreen = () => {
 	const game = useSelector(state => state.game);
 
 	const { pois, total_score, round_number } = game;
 
+	const isFocused = useIsFocused();
+	const user = useSelector(state => state.user);
+
+	useEffect(() => {
+		if (isFocused) {
+			// incrementUserPracticeGameDoneCount(user.email);
+		}
+	}, [isFocused]);
+
 	return (
-		<Container style={{backgroundColor: COLORS.background}}>
+		<Container style={{ backgroundColor: COLORS.background }}>
 			<ImageBackground
 				source={require('../assets/image_yan/final-imgs/map-bg2.png')}
 				style={{ flex: 1, resizeMode: 'cover', justifyContent: 'center' }}

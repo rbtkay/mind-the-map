@@ -25,3 +25,5 @@ export const thumbnails = {
     "Beirut": require("../assets/lebanon.png"),
     "Paris": require("../assets/eiffel-tower.png")
 }
+
+export const DEFAULT_USER_IMAGE = require('../assets/image_yan/final-imgs/profile.png');
